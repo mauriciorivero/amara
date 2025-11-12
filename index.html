@@ -28,16 +28,23 @@
         <section class="info-section">
             <!-- Pantalla de Gestión de Madres (Oculta por defecto) -->
             <div class="madres-screen" id="madresModal">
-                <button class="modal-close" onclick="closeMadresModal()">×</button>
-                
                 <!-- Vista Principal: Listado de Madres -->
                 <div id="madresListView" class="madres-view active">
                     <div class="madres-header">
                         <h2 class="madres-title">Madres Registradas</h2>
-                        <button class="btn-add-primary" onclick="showFormView()">
-                            <span class="btn-icon">+</span>
-                            Registrar Nueva Madre
-                        </button>
+                        <div class="madres-header-buttons">
+                            <button class="btn-add-primary" onclick="showFormView()">
+                                <span class="btn-icon">+</span>
+                                Registrar Nueva Madre
+                            </button>
+                            <button class="btn-close-madres" onclick="closeMadresModal()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Cerrar
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Filtros -->
@@ -208,7 +215,16 @@
                             Volver al listado
                         </button>
                         <h2 class="detail-title">Información Completa de la Madre</h2>
-                        <button class="btn-edit-primary" onclick="editMadre()">Editar Información</button>
+                        <div class="madres-header-buttons">
+                            <button class="btn-edit-primary" onclick="editMadre()">Editar Información</button>
+                            <button class="btn-close-madres" onclick="closeMadresModal()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Cerrar
+                            </button>
+                        </div>
                     </div>
 
                     <div class="detail-content">
@@ -229,6 +245,13 @@
                             Volver al listado
                         </button>
                         <h2 class="form-title" id="formTitle">Registrar Nueva Madre</h2>
+                        <button class="btn-close-madres" onclick="closeMadresModal()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Cerrar
+                        </button>
                     </div>
 
                     <div class="form-content">
