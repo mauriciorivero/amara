@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amara - Software de seguimiento a madres</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 24px;">⚡</span>
+                </div>
+                Amara
+            </div>
+            <nav>
+                <a href="#home">Madres</a>
+                <a href="#activities">Nacimientos</a>
+                <a href="#about">Bebes</a>
+                <a href="#blog">Aliados</a>
+                <a href="#blog">Embarazos</a>
+            </nav>
+            <a href="#" class="download-btn">DOWNLOAD APP</a>
+        </header>
+
+        <section class="info-section">
+            <!-- Pantalla de Gestión de Madres (Oculta por defecto) -->
+            <div class="madres-screen" id="madresModal">
+                <button class="modal-close" onclick="closeMadresModal()">×</button>
+                
+                <!-- Vista Principal: Listado de Madres -->
+                <div id="madresListView" class="madres-view active">
+                    <div class="madres-header">
+                        <h2 class="madres-title">Madres Registradas</h2>
+                        <button class="btn-add-primary" onclick="showFormView()">
+                            <span class="btn-icon">+</span>
+                            Registrar Nueva Madre
+                        </button>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <input type="text" id="searchNombre" class="filter-input search-input" placeholder="🔍 Buscar por nombre o apellido...">
+                        </div>
+                        
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Estado</label>
+                                <select id="filterEstado" class="filter-select">
+                                    <option value="">Todos</option>
+                                    <option value="activa">Activas</option>
+                                    <option value="desvinculada">Desvinculadas</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Orientadora</label>
+                                <select id="filterOrientadora" class="filter-select">
+                                    <option value="">Todas</option>
+                                    <!-- Se cargarán dinámicamente -->
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Grupo de Edad</label>
+                                <select id="filterEdad" class="filter-select">
+                                    <option value="">Todas las edades</option>
+                                    <option value="menor">Menores de 18</option>
+                                    <option value="18-25">18-25 años</option>
+                                    <option value="26-35">26-35 años</option>
+                                    <option value="36-45">36-45 años</option>
+                                    <option value="mayor">Mayores de 45</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">EPS</label>
+                                <select id="filterEps" class="filter-select">
+                                    <option value="">Todas</option>
+                                    <!-- Se cargarán dinámicamente -->
+                                </select>
+                            </div>
+
+                            <button class="btn-filter-clear" onclick="clearFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Madres -->
+                    <div class="table-wrapper">
+                        <table class="madres-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Edad</th>
+                                    <th>Documento</th>
+                                    <th>Teléfono</th>
+                                    <th>Orientadora</th>
+                                    <th>EPS</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Bebés</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="madresTableBody">
+                                <!-- Datos de ejemplo - Se cargarán dinámicamente -->
+                                <tr>
+                                    <td class="td-id">001</td>
+                                    <td class="td-name">
+                                        <div class="contact-info">
+                                            <div class="avatar">MG</div>
+                                            <span>María González Pérez</span>
+                                        </div>
+                                    </td>
+                                    <td>24</td>
+                                    <td>1234567890</td>
+                                    <td class="td-phone">(300) 555-0123</td>
+                                    <td>Ana María López</td>
+                                    <td>Sanitas EPS</td>
+                                    <td>15/03/2024</td>
+                                    <td class="td-center"><span class="badge-count">2</span></td>
+                                    <td><span class="status-badge status-active">Activa</span></td>
+                                    <td class="td-actions">
+                                        <button class="btn-action btn-view" onclick="viewMadreDetails(1)" title="Ver detalles">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                        <button class="btn-action btn-call" onclick="callMadre('3005550123')" title="Llamar">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="td-id">002</td>
+                                    <td class="td-name">
+                                        <div class="contact-info">
+                                            <div class="avatar">LP</div>
+                                            <span>Laura Martínez Silva</span>
+                                        </div>
+                                    </td>
+                                    <td>19</td>
+                                    <td>9876543210</td>
+                                    <td class="td-phone">(310) 555-0456</td>
+                                    <td>Carmen Rodríguez</td>
+                                    <td>Nueva EPS</td>
+                                    <td>22/02/2024</td>
+                                    <td class="td-center"><span class="badge-count">1</span></td>
+                                    <td><span class="status-badge status-active">Activa</span></td>
+                                    <td class="td-actions">
+                                        <button class="btn-action btn-view" onclick="viewMadreDetails(2)" title="Ver detalles">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                        <button class="btn-action btn-call" onclick="callMadre('3105550456')" title="Llamar">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination-modern">
+                        <div class="pagination-info">
+                            Mostrando <span class="per-page-select">
+                                <select id="perPage">
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </span> por página
+                        </div>
+                        <div class="pagination-controls">
+                            <span class="page-count">1 - 25 de 100</span>
+                            <div class="page-buttons">
+                                <button class="page-btn" disabled>←</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn">2</button>
+                                <button class="page-btn">3</button>
+                                <span class="page-dots">...</span>
+                                <button class="page-btn">6</button>
+                                <button class="page-btn">→</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalles de Madre -->
+                <div id="madreDetailView" class="madres-view">
+                    <div class="detail-header">
+                        <button class="btn-back" onclick="showListView()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                            Volver al listado
+                        </button>
+                        <h2 class="detail-title">Información Completa de la Madre</h2>
+                        <button class="btn-edit-primary" onclick="editMadre()">Editar Información</button>
+                    </div>
+
+                    <div class="detail-content">
+                        <div id="madreDetailContent">
+                            <!-- Se cargará dinámicamente -->
+                            <p class="no-data">Seleccione una madre para ver sus detalles</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Formulario (Registro/Edición) -->
+                <div id="madreFormView" class="madres-view">
+                    <div class="form-header">
+                        <button class="btn-back" onclick="showListView()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                            Volver al listado
+                        </button>
+                        <h2 class="form-title" id="formTitle">Registrar Nueva Madre</h2>
+                    </div>
+
+                    <div class="form-content">
+                        <form id="madreForm" class="madre-form-modern">
+                            <input type="hidden" id="madreId" name="madreId">
+                            
+                            <!-- Aquí irá el formulario completo - lo agregaré en el siguiente paso -->
+                            <p class="info-message">Formulario de registro en construcción...</p>
+                            
+                            <div class="form-actions-bottom">
+                                <button type="button" class="btn-cancel" onclick="showListView()">Cancelar</button>
+                                <button type="submit" class="btn-save">Guardar Madre</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de información (Visibles por defecto) -->
+            <div class="info-card community" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Nuestras</div>
+                        <div class="card-main-title">Madres</div>
+                    </div>
+                    <div class="arrow-icon" onclick="openMadresModal()">↗</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-text">450K+ Active Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">▶</div>
+                    <div class="stat-text">3500+ Hour of Fitness Content</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-text">200+ Fitness Coaches</div>
+                </div>
+            </div>
+
+            <div class="info-card activities" data-card>
+                <div class="card-header">
+                    <div class="card-main-title" style="font-size: 28px;">Orientadoras</div>
+                    <div class="arrow-icon">↗</div>
+                </div>
+                <div class="activities-grid">
+                    <div class="activity-tag">JOGGING</div>
+                    <div class="activity-tag">ZUMBA</div>
+                    <div class="activity-tag">AEROBICS</div>
+                    <div class="activity-tag">GYM</div>
+                    <div class="activity-tag">YOGA</div>
+                    <div class="activity-tag active">⭐</div>
+                    <div class="activity-tag">CYCLING</div>
+                    <div class="activity-tag">SWIMMING</div>
+                    <div class="activity-tag">STRETCHING</div>
+                </div>
+            </div>
+
+            <div class="info-card tracking" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title" style="color: #ddd;">Proximos</div>
+                        <div class="card-main-title" style="color: white;">Embarazos</div>
+                    </div>
+                    <div class="arrow-icon">↗</div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #c8ff00;"></span>
+                        Physical Health
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: white;"></span>
+                        Mental Health
+                    </div>
+                </div>
+                <div class="chart">
+                    <svg width="100%" height="150" style="position: absolute; bottom: 0;">
+                        <polyline points="0,120 50,100 100,110 150,80 200,90 250,60 300,70" 
+                                  fill="none" stroke="#c8ff00" stroke-width="3"/>
+                        <polyline points="0,130 50,110 100,100 150,90 200,85 250,70 300,60" 
+                                  fill="none" stroke="white" stroke-width="3"/>
+                        <circle cx="300" cy="70" r="5" fill="#c8ff00"/>
+                        <circle cx="300" cy="60" r="5" fill="white"/>
+                    </svg>
+                    <div style="position: absolute; bottom: 0; display: flex; justify-content: space-between; width: 100%; color: #ddd; font-size: 12px; padding: 0 10px;">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span style="background: white; color: #a855f7; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Fri</span>
+                        <span>Sat</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card community" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Nuestros</div>
+                        <div class="card-main-title">Aliados</div>
+                    </div>
+                    <div class="arrow-icon" onclick="openModal()">↗</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-text">450K+ Active Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">▶</div>
+                    <div class="stat-text">3500+ Hour of Fitness Content</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-text">200+ Fitness Coaches</div>
+                </div>
+            </div>
+
+            <div class="info-card activities" data-card>
+                <div class="card-header">
+                    <div class="card-main-title" style="font-size: 28px;">Orientadoras</div>
+                    <div class="arrow-icon">↗</div>
+                </div>
+                <div class="activities-grid">
+                    <div class="activity-tag">JOGGING</div>
+                    <div class="activity-tag">ZUMBA</div>
+                    <div class="activity-tag">AEROBICS</div>
+                    <div class="activity-tag">GYM</div>
+                    <div class="activity-tag">YOGA</div>
+                    <div class="activity-tag active">⭐</div>
+                    <div class="activity-tag">CYCLING</div>
+                    <div class="activity-tag">SWIMMING</div>
+                    <div class="activity-tag">STRETCHING</div>
+                </div>
+            </div>
+
+            <div class="info-card tracking" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title" style="color: #ddd;">Proximos</div>
+                        <div class="card-main-title" style="color: white;">Embarazos</div>
+                    </div>
+                    <div class="arrow-icon">↗</div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #c8ff00;"></span>
+                        Physical Health
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: white;"></span>
+                        Mental Health
+                    </div>
+                </div>
+                <div class="chart">
+                    <svg width="100%" height="150" style="position: absolute; bottom: 0;">
+                        <polyline points="0,120 50,100 100,110 150,80 200,90 250,60 300,70" 
+                                  fill="none" stroke="#c8ff00" stroke-width="3"/>
+                        <polyline points="0,130 50,110 100,100 150,90 200,85 250,70 300,60" 
+                                  fill="none" stroke="white" stroke-width="3"/>
+                        <circle cx="300" cy="70" r="5" fill="#c8ff00"/>
+                        <circle cx="300" cy="60" r="5" fill="white"/>
+                    </svg>
+                    <div style="position: absolute; bottom: 0; display: flex; justify-content: space-between; width: 100%; color: #ddd; font-size: 12px; padding: 0 10px;">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span style="background: white; color: #a855f7; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Fri</span>
+                        <span>Sat</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="joinModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2>¡Únete a Nosotros!</h2>
+            <p>Comienza tu viaje hacia el bienestar. Completa tus datos y forma parte de nuestra comunidad de fitness y yoga.</p>
+            <input type="text" class="modal-input" placeholder="Nombre completo">
+            <input type="email" class="modal-input" placeholder="Correo electrónico">
+            <input type="tel" class="modal-input" placeholder="Teléfono">
+            <button class="modal-submit">Comenzar Ahora</button>
+        </div>
+    </div>
+
+    <script src="js/visualBehavior.js"></script>
+</body>
+</html>
