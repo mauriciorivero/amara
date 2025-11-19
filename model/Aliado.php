@@ -1,6 +1,7 @@
 <?php
 
-class Aliado {
+class Aliado implements JsonSerializable
+{
     // Atributos privados
     private ?int $id;
     private string $nombre;
@@ -24,45 +25,66 @@ class Aliado {
     }
 
     // Getters
-    public function getId(): ?int {
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
-    public function getNombre(): string {
+    public function getNombre(): string
+    {
         return $this->nombre;
     }
 
-    public function isActivo(): bool {
+    public function isActivo(): bool
+    {
         return $this->activo;
     }
 
-    public function getCreatedAt(): ?string {
+    public function getCreatedAt(): ?string
+    {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?string {
+    public function getUpdatedAt(): ?string
+    {
         return $this->updatedAt;
     }
 
     // Setters
-    public function setId(?int $id): void {
+    public function setId(?int $id): void
+    {
         $this->id = $id;
     }
 
-    public function setNombre(string $nombre): void {
+    public function setNombre(string $nombre): void
+    {
         $this->nombre = $nombre;
     }
 
-    public function setActivo(bool $activo): void {
+    public function setActivo(bool $activo): void
+    {
         $this->activo = $activo;
     }
 
-    public function setCreatedAt(?string $createdAt): void {
+    public function setCreatedAt(?string $createdAt): void
+    {
         $this->createdAt = $createdAt;
     }
 
-    public function setUpdatedAt(?string $updatedAt): void {
+    public function setUpdatedAt(?string $updatedAt): void
+    {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'nombre' => $this->nombre,
+            'activo' => $this->activo,
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt
+        ];
     }
 }
 
