@@ -275,7 +275,7 @@ class Madre implements JsonSerializable
         return $this->orientadora;
     }
 
-    public function getAlliadoId(): ?int
+    public function getAliadoId(): ?int
     {
         return $this->aliadoId;
     }
@@ -518,6 +518,8 @@ class Madre implements JsonSerializable
         $this->updatedAt = $updatedAt;
     }
 
+
+
     public function jsonSerialize(): mixed
     {
         return [
@@ -559,7 +561,7 @@ class Madre implements JsonSerializable
             'activa' => $this->isActiva(),
             'novedades' => $this->novedades,
             'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt
+            'updatedAt' => $this->updatedAt,
         ];
     }
 }

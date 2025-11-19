@@ -14,8 +14,62 @@ class MadreDAO
         $this->conn = Database::getInstance()->getConnection();
     }
 
-    public function getAll()
+    public function getAll($limit = 25, $offset = 0, $filters = [])
     {
+        $where = "WHERE 1=1";
+        $params = [];
+
+        // Filtros
+        if (!empty($filters['search'])) {
+            $where .= " AND (
+                m.primer_nombre LIKE :search OR 
+                m.segundo_nombre LIKE :search OR 
+                m.primer_apellido LIKE :search OR 
+                m.segundo_apellido LIKE :search OR
+                m.numero_documento LIKE :search OR
+                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search
+            )";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['estado'])) {
+            if ($filters['estado'] === 'activa') {
+                $where .= " AND (m.desvinculo IS NULL OR m.desvinculo = '')";
+            } elseif ($filters['estado'] === 'desvinculada') {
+                $where .= " AND (m.desvinculo IS NOT NULL AND m.desvinculo != '')";
+            }
+        }
+
+        if (!empty($filters['orientadora'])) {
+            $where .= " AND m.orientadora_id = :orientadora";
+            $params[':orientadora'] = $filters['orientadora'];
+        }
+
+        if (!empty($filters['eps'])) {
+            $where .= " AND m.eps_id = :eps";
+            $params[':eps'] = $filters['eps'];
+        }
+
+        if (!empty($filters['edad'])) {
+            switch ($filters['edad']) {
+                case 'menor':
+                    $where .= " AND m.edad < 18";
+                    break;
+                case '18-25':
+                    $where .= " AND m.edad BETWEEN 18 AND 25";
+                    break;
+                case '26-35':
+                    $where .= " AND m.edad BETWEEN 26 AND 35";
+                    break;
+                case '36-45':
+                    $where .= " AND m.edad BETWEEN 36 AND 45";
+                    break;
+                case 'mayor':
+                    $where .= " AND m.edad > 45";
+                    break;
+            }
+        }
+
         $sql = "SELECT m.*, 
                        o.id as orientadora_id_real, o.nombre as orientadora_nombre,
                        a.id as aliado_id_real, a.nombre as aliado_nombre,
@@ -24,9 +78,18 @@ class MadreDAO
                 LEFT JOIN orientadoras o ON m.orientadora_id = o.id
                 LEFT JOIN aliados a ON m.aliado_id = a.id
                 LEFT JOIN eps e ON m.eps_id = e.id
-                ORDER BY m.fecha_ingreso DESC";
+                $where
+                ORDER BY m.fecha_ingreso DESC
+                LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+
         $stmt->execute();
 
         $madres = [];
@@ -34,6 +97,74 @@ class MadreDAO
             $madres[] = $this->mapRowToMadre($row);
         }
         return $madres;
+    }
+
+    public function countAll($filters = [])
+    {
+        $where = "WHERE 1=1";
+        $params = [];
+
+        // Copiar lógica de filtros (idealmente refactorizar en método privado)
+        if (!empty($filters['search'])) {
+            $where .= " AND (
+                m.primer_nombre LIKE :search OR 
+                m.segundo_nombre LIKE :search OR 
+                m.primer_apellido LIKE :search OR 
+                m.segundo_apellido LIKE :search OR
+                m.numero_documento LIKE :search OR
+                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search
+            )";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['estado'])) {
+            if ($filters['estado'] === 'activa') {
+                $where .= " AND (m.desvinculo IS NULL OR m.desvinculo = '')";
+            } elseif ($filters['estado'] === 'desvinculada') {
+                $where .= " AND (m.desvinculo IS NOT NULL AND m.desvinculo != '')";
+            }
+        }
+
+        if (!empty($filters['orientadora'])) {
+            $where .= " AND m.orientadora_id = :orientadora";
+            $params[':orientadora'] = $filters['orientadora'];
+        }
+
+        if (!empty($filters['eps'])) {
+            $where .= " AND m.eps_id = :eps";
+            $params[':eps'] = $filters['eps'];
+        }
+
+        if (!empty($filters['edad'])) {
+            switch ($filters['edad']) {
+                case 'menor':
+                    $where .= " AND m.edad < 18";
+                    break;
+                case '18-25':
+                    $where .= " AND m.edad BETWEEN 18 AND 25";
+                    break;
+                case '26-35':
+                    $where .= " AND m.edad BETWEEN 26 AND 35";
+                    break;
+                case '36-45':
+                    $where .= " AND m.edad BETWEEN 36 AND 45";
+                    break;
+                case 'mayor':
+                    $where .= " AND m.edad > 45";
+                    break;
+            }
+        }
+
+        $sql = "SELECT COUNT(*) as total FROM madres m $where";
+        $stmt = $this->conn->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int) $row['total'];
     }
 
     public function getById($id)
@@ -57,6 +188,88 @@ class MadreDAO
             return $this->mapRowToMadre($row);
         }
         return null;
+    }
+
+    public function create(Madre $madre): bool
+    {
+        $sql = "INSERT INTO madres (
+            fecha_ingreso, es_virtual, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+            tipo_documento, numero_documento, fecha_nacimiento, edad, sexo, numero_telefono, otro_contacto,
+            numero_hijos, perdidas, estado_civil, nombre_pareja, telefono_pareja, de_acuerdo_aborto,
+            nivel_estudio, ocupacion, religion, eps_id, sisben, enfermedades_medicamento, se_entero_por,
+            orientadora_id, aliado_id, asiste_discipulado, desvinculo, novedades
+        ) VALUES (
+            :fechaIngreso, :esVirtual, :primerNombre, :segundoNombre, :primerApellido, :segundoApellido,
+            :tipoDocumento, :numeroDocumento, :fechaNacimiento, :edad, :sexo, :numeroTelefono, :otroContacto,
+            :numeroHijos, :perdidas, :estadoCivil, :nombrePareja, :telefonoPareja, :deAcuerdoAborto,
+            :nivelEstudio, :ocupacion, :religion, :epsId, :sisben, :enfermedadesMedicamento, :seEnteroPor,
+            :orientadoraId, :aliadoId, :asisteDiscipulado, :desvinculo, :novedades
+        )";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $params = $this->mapParams($madre);
+        return $stmt->execute($params);
+    }
+
+    public function update(Madre $madre): bool
+    {
+        $sql = "UPDATE madres SET 
+            fecha_ingreso = :fechaIngreso, es_virtual = :esVirtual, primer_nombre = :primerNombre, 
+            segundo_nombre = :segundoNombre, primer_apellido = :primerApellido, segundo_apellido = :segundoApellido,
+            tipo_documento = :tipoDocumento, numero_documento = :numeroDocumento, fecha_nacimiento = :fechaNacimiento,
+            edad = :edad, sexo = :sexo, numero_telefono = :numeroTelefono, otro_contacto = :otroContacto,
+            numero_hijos = :numeroHijos, perdidas = :perdidas, estado_civil = :estadoCivil, 
+            nombre_pareja = :nombrePareja, telefono_pareja = :telefonoPareja, de_acuerdo_aborto = :deAcuerdoAborto,
+            nivel_estudio = :nivelEstudio, ocupacion = :ocupacion, religion = :religion, eps_id = :epsId,
+            sisben = :sisben, enfermedades_medicamento = :enfermedadesMedicamento, se_entero_por = :seEnteroPor,
+            orientadora_id = :orientadoraId, aliado_id = :aliadoId, asiste_discipulado = :asisteDiscipulado,
+            desvinculo = :desvinculo, novedades = :novedades
+            WHERE id = :id";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $params = $this->mapParams($madre);
+        $params[':id'] = $madre->getId();
+
+        return $stmt->execute($params);
+    }
+
+    private function mapParams(Madre $madre): array
+    {
+        return [
+            ':fechaIngreso' => $madre->getFechaIngreso(),
+            ':esVirtual' => $madre->isEsVirtual() ? 1 : 0,
+            ':primerNombre' => $madre->getPrimerNombre(),
+            ':segundoNombre' => $madre->getSegundoNombre(),
+            ':primerApellido' => $madre->getPrimerApellido(),
+            ':segundoApellido' => $madre->getSegundoApellido(),
+            ':tipoDocumento' => $madre->getTipoDocumento(),
+            ':numeroDocumento' => $madre->getNumeroDocumento(),
+            ':fechaNacimiento' => $madre->getFechaNacimiento(),
+            ':edad' => $madre->getEdad(),
+            ':sexo' => $madre->getSexo(),
+            ':numeroTelefono' => $madre->getNumeroTelefono(),
+            ':otroContacto' => $madre->getOtroContacto(),
+            ':numeroHijos' => $madre->getNumeroHijos(),
+            ':perdidas' => $madre->getPerdidas(),
+            ':estadoCivil' => $madre->getEstadoCivil(),
+            ':nombrePareja' => $madre->getNombrePareja(),
+            ':telefonoPareja' => $madre->getTelefonoPareja(),
+            ':deAcuerdoAborto' => $madre->getDeAcuerdoAborto(),
+            ':nivelEstudio' => $madre->getNivelEstudio(),
+            ':ocupacion' => $madre->getOcupacion(),
+            ':religion' => $madre->getReligion(),
+            ':epsId' => $madre->getEpsId(),
+            ':sisben' => $madre->getSisben(),
+            ':enfermedadesMedicamento' => $madre->getEnfermedadesMedicamento(),
+            ':seEnteroPor' => $madre->getSeEnteroPor(),
+            ':orientadoraId' => $madre->getOrientadoraId(),
+            ':aliadoId' => $madre->getAliadoId(),
+            ':asisteDiscipulado' => $madre->getAsisteDiscipulado(),
+            ':desvinculo' => $madre->getDesvinculo(),
+            ':novedades' => $madre->getNovedades()
+        ];
     }
 
     private function mapRowToMadre($row)
