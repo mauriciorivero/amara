@@ -13,7 +13,7 @@ class OrientadoraDAO
 
     public function getAll(): array
     {
-        $sql = "SELECT * FROM orientadoras WHERE activa = 1 ORDER BY nombre ASC";
+        $sql = "SELECT * FROM orientadoras ORDER BY nombre ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
 
@@ -22,8 +22,8 @@ class OrientadoraDAO
 
         foreach ($resultados as $row) {
             $orientadora = new Orientadora(
-                $row['id'],
                 $row['nombre'],
+                (int) $row['id'],
                 (bool) $row['activa'],
                 $row['created_at'],
                 $row['updated_at']

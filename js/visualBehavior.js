@@ -288,11 +288,7 @@ async function loadMadreDetails(madreId) {
 function renderMadreDetail(madre) {
     const detailContent = document.getElementById('madreDetailContent');
 
-    // Configurar botón de editar
-    const editBtn = document.querySelector('#madreDetailView .btn-edit');
-    if (editBtn) {
-        editBtn.onclick = () => editMadre(madre.id);
-    }
+
 
     const orientadora = madre.orientadora ? madre.orientadora.nombre : 'Sin asignar';
     const aliado = madre.aliado ? madre.aliado.nombre : 'Sin asignar';
@@ -351,6 +347,12 @@ function renderMadreDetail(madre) {
             <p>${madre.novedades}</p>
         </div>` : ''}
     `;
+
+    // Actualizar el botón de editar con el ID correcto
+    const editBtn = document.querySelector('#madreDetailView .btn-edit-primary');
+    if (editBtn) {
+        editBtn.onclick = () => editMadre(madre.id);
+    }
 }
 
 // Editar madre
@@ -441,7 +443,7 @@ function clearFilters() {
 async function loadFormOptions() {
     // Solo cargar si no tienen opciones (evitar recargas innecesarias)
     const epsSelect = document.getElementById('selectEps');
-    if (epsSelect.options.length > 1) return;
+    if (epsSelect && epsSelect.options.length > 1) return;
 
     try {
         // Cargar EPS
@@ -452,7 +454,8 @@ async function loadFormOptions() {
                     populateSelect('selectEps', data.data);
                     populateSelect('filterEps', data.data); // Poblar filtro
                 }
-            });
+            })
+            .catch(err => console.error('Error fetch EPS:', err));
 
         // Cargar Orientadoras
         fetch('api/orientadoras/listar.php')
@@ -462,14 +465,16 @@ async function loadFormOptions() {
                     populateSelect('selectOrientadora', data.data);
                     populateSelect('filterOrientadora', data.data); // Poblar filtro
                 }
-            });
+            })
+            .catch(err => console.error('Error fetch Orientadoras:', err));
 
         // Cargar Aliados
         fetch('api/aliados/listar.php')
             .then(res => res.json())
             .then(data => {
                 if (data.success) populateSelect('selectAliado', data.data);
-            });
+            })
+            .catch(err => console.error('Error fetch Aliados:', err));
 
     } catch (error) {
         console.error('Error cargando opciones del formulario:', error);

@@ -13,7 +13,7 @@ class AliadoDAO
 
     public function getAll(): array
     {
-        $sql = "SELECT * FROM aliados WHERE activo = 1 ORDER BY nombre ASC";
+        $sql = "SELECT * FROM aliados ORDER BY nombre ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
 
@@ -22,8 +22,8 @@ class AliadoDAO
 
         foreach ($resultados as $row) {
             $aliado = new Aliado(
-                $row['id'],
                 $row['nombre'],
+                (int) $row['id'],
                 (bool) $row['activo'],
                 $row['created_at'],
                 $row['updated_at']

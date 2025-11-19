@@ -22,8 +22,8 @@ class EpsDAO
 
         foreach ($resultados as $row) {
             $eps = new Eps(
-                $row['id'],
                 $row['nombre'],
+                (int) $row['id'],
                 (bool) $row['activa'],
                 $row['created_at'],
                 $row['updated_at']
