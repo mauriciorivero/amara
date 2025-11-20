@@ -8,10 +8,11 @@ try {
     $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
     $offset = ($page - 1) * $limit;
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
     $dao = new BebeDAO();
-    $bebes = $dao->getAll($limit, $offset);
-    $total = $dao->countAll();
+    $bebes = $dao->getAll($limit, $offset, $search);
+    $total = $dao->countAll($search);
 
     // Mapear bebés a formato JSON serializable
     $bebesData = array_map(function ($bebe) {

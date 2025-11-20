@@ -1250,6 +1250,12 @@ function openEmbarazosBebesScreen() {
 
     loadGlobalEmbarazos();
     loadGlobalBebes();
+    
+    // Configurar búsqueda si no está configurado
+    if (!window.searchEmbarazosBebesInitialized) {
+        setupEmbarazosBebesSearch();
+        window.searchEmbarazosBebesInitialized = true;
+    }
 }
 
 function closeEmbarazosBebesScreen() {
@@ -1272,14 +1278,19 @@ function showEmbarazosBebesDetail(title, content) {
 }
 
 // Cargar lista global de embarazos
-async function loadGlobalEmbarazos() {
+async function loadGlobalEmbarazos(search = '') {
     const container = document.getElementById('globalEmbarazosList');
     const countBadge = document.getElementById('globalEmbarazosCount');
 
     container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
 
     try {
-        const response = await fetch('api/embarazos/listar.php?limit=50');
+        const params = new URLSearchParams({
+            limit: 50,
+            search: search
+        });
+        
+        const response = await fetch(`api/embarazos/listar.php?${params.toString()}`);
         const result = await response.json();
 
         if (result.success) {
@@ -1383,14 +1394,19 @@ async function verDetalleEmbarazoGlobal(id) {
 }
 
 // Cargar lista global de bebés
-async function loadGlobalBebes() {
+async function loadGlobalBebes(search = '') {
     const container = document.getElementById('globalBebesList');
     const countBadge = document.getElementById('globalBebesCount');
 
     container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
 
     try {
-        const response = await fetch('api/bebes/listar.php?limit=50');
+        const params = new URLSearchParams({
+            limit: 50,
+            search: search
+        });
+        
+        const response = await fetch(`api/bebes/listar.php?${params.toString()}`);
         const result = await response.json();
 
         if (result.success) {
@@ -1543,6 +1559,27 @@ async function loadDashboardStats() {
     } catch (error) {
         console.error('Error cargando estadísticas de embarazos:', error);
     }
+}
+
+// Configurar búsqueda de embarazos y bebés
+function setupEmbarazosBebesSearch() {
+    const searchInput = document.getElementById('searchEmbarazosBebes');
+    if (!searchInput) return;
+    
+    let searchTimeout = null;
+    
+    searchInput.addEventListener('input', function(e) {
+        const searchValue = e.target.value.trim();
+        
+        // Limpiar timeout anterior
+        clearTimeout(searchTimeout);
+        
+        // Esperar 500ms antes de buscar (debounce)
+        searchTimeout = setTimeout(() => {
+            loadGlobalEmbarazos(searchValue);
+            loadGlobalBebes(searchValue);
+        }, 500);
+    });
 }
 
 // Inicializar dashboard

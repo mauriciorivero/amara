@@ -8,10 +8,11 @@ try {
     $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
     $offset = ($page - 1) * $limit;
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
     $dao = new EmbarazoDAO();
-    $embarazos = $dao->getAll($limit, $offset);
-    $total = $dao->countAll();
+    $embarazos = $dao->getAll($limit, $offset, $search);
+    $total = $dao->countAll($search);
 
     $data = array_map(function ($embarazo) {
         $madre = $embarazo->getMadre();

@@ -16,18 +16,32 @@ class BebeDAO
     /**
      * Obtener todos los bebés
      */
-    public function getAll($limit = 100, $offset = 0)
+    public function getAll($limit = 100, $offset = 0, $search = '')
     {
         $sql = "SELECT b.*, 
                        m.id as madre_id_real, m.primer_nombre, m.segundo_nombre, m.primer_apellido, m.segundo_apellido,
                        e.id as embarazo_id_real
                 FROM bebes b
                 INNER JOIN madres m ON b.madre_id = m.id
-                INNER JOIN embarazos e ON b.embarazo_id = e.id
-                ORDER BY b.fecha_nacimiento DESC, b.created_at DESC
+                INNER JOIN embarazos e ON b.embarazo_id = e.id";
+
+        // Agregar filtro de búsqueda si existe
+        if (!empty($search)) {
+            $sql .= " WHERE (m.primer_nombre LIKE :search 
+                      OR m.primer_apellido LIKE :search 
+                      OR b.nombre LIKE :search)";
+        }
+
+        $sql .= " ORDER BY b.fecha_nacimiento DESC, b.created_at DESC
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($sql);
+        
+        if (!empty($search)) {
+            $searchParam = '%' . $search . '%';
+            $stmt->bindValue(':search', $searchParam, PDO::PARAM_STR);
+        }
+        
         $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -182,10 +196,27 @@ class BebeDAO
     /**
      * Contar total de bebés
      */
-    public function countAll(): int
+    public function countAll($search = ''): int
     {
-        $sql = "SELECT COUNT(*) as total FROM bebes";
-        $stmt = $this->conn->query($sql);
+        $sql = "SELECT COUNT(*) as total 
+                FROM bebes b
+                INNER JOIN madres m ON b.madre_id = m.id";
+        
+        // Agregar filtro de búsqueda si existe
+        if (!empty($search)) {
+            $sql .= " WHERE (m.primer_nombre LIKE :search 
+                      OR m.primer_apellido LIKE :search 
+                      OR b.nombre LIKE :search)";
+        }
+        
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!empty($search)) {
+            $searchParam = '%' . $search . '%';
+            $stmt->bindValue(':search', $searchParam, PDO::PARAM_STR);
+        }
+        
+        $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return (int) $row['total'];
     }
