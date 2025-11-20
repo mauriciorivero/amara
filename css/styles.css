@@ -1939,8 +1939,13 @@ nav a:hover {
    ======================================== */
 
 .modal-embarazo {
-    max-width: 600px;
+    max-width: 900px;
+    width: 90%;
+    max-height: 85vh;
     padding: 35px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .modal-subtitle {
@@ -1951,21 +1956,30 @@ nav a:hover {
 }
 
 .embarazo-form {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
+    max-height: calc(85vh - 200px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Hacer que algunos campos ocupen toda la fila */
+.form-group-embarazo.full-width {
+    grid-column: 1 / -1;
 }
 
 .form-group-embarazo {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
 }
 
 .form-group-embarazo label {
     font-size: 15px;
     font-weight: 600;
-    color: #1f2937;
+    color: #aaaaaa;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1997,6 +2011,62 @@ nav a:hover {
 
 .form-input-embarazo:hover {
     border-color: #c4b5fd;
+}
+
+/* Estilos para autocompletado de búsqueda de madre */
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.autocomplete-item:hover {
+    background: #f9fafb;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item strong {
+    display: block;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.autocomplete-item small {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.autocomplete-item.no-results {
+    color: #9ca3af;
+    cursor: default;
+    text-align: center;
+}
+
+.autocomplete-item.no-results:hover {
+    background: white;
+}
+
+.form-group-embarazo {
+    position: relative;
 }
 
 .form-hint {
@@ -2110,6 +2180,7 @@ nav a:hover {
     border-radius: 8px;
     font-size: 13px;
     display: flex;
+    grid-column: 1 / -1;
     align-items: center;
     gap: 8px;
 }
@@ -2121,6 +2192,7 @@ nav a:hover {
     margin-top: 10px;
     padding-top: 20px;
     border-top: 2px solid #f3f4f6;
+    grid-column: 1 / -1;
 }
 
 .btn-cancel-modal {
@@ -2169,7 +2241,42 @@ nav a:hover {
     font-size: 18px;
 }
 
+/* Estilos para scrollbar del formulario */
+.embarazo-form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.embarazo-form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.embarazo-form::-webkit-scrollbar-thumb {
+    background: #c4b5fd;
+    border-radius: 4px;
+}
+
+.embarazo-form::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
+}
+
+/* Asegurar que modal-actions no se desplace */
+.modal-actions {
+    margin-top: 20px;
+}
+
 /* Responsive para modal de embarazo */
+@media (max-width: 768px) {
+    .embarazo-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-embarazo {
+        max-width: 95%;
+        width: 95%;
+    }
+}
+
 @media (max-width: 640px) {
     .modal-embarazo {
         max-width: 95%;
@@ -2345,6 +2452,7 @@ nav a:hover {
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e5e7eb;
+    gap: 10px;
 }
 
 .column-header h3 {
@@ -2352,6 +2460,47 @@ nav a:hover {
     color: #374151;
     margin: 0;
     font-weight: 700;
+    flex: 1;
+}
+
+.column-header .badge-count {
+    background: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.column-header .btn-add-embarazo {
+    padding: 8px 16px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.column-header .btn-add-embarazo:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.column-header .btn-add-embarazo:active {
+    transform: translateY(0);
+}
+
+.column-header .btn-add-embarazo span {
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .list-container {
@@ -2537,5 +2686,343 @@ nav a:hover {
 .btn-back:hover {
     background: #f3f4f6;
     color: #374151;
+}
+
+/* ========================================
+   MÓDULO DE AYUDAS
+   ======================================== */
+
+/* El módulo de ayudas usa la clase .module-screen genérica */
+/* Estilos específicos para las vistas dentro del módulo */
+.ayudas-view {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow-y: auto;
+    background: #f5f7fa;
+}
+
+.ayudas-view.active {
+    display: flex;
+}
+
+/* Elementos con padding */
+.ayudas-view .filters-container,
+.ayudas-view .table-wrapper,
+.ayudas-view .pagination-modern {
+    margin: 0 30px;
+}
+
+.ayudas-view .filters-container {
+    margin-top: 20px;
+}
+
+.ayudas-view .pagination-modern {
+    margin-bottom: 20px;
+}
+
+/* Encabezado con botones */
+.madres-header-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-add-primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-add-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-add-primary .btn-icon {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Tabla de ayudas */
+.ayudas-view .table-wrapper {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 30px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.td-valor {
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* Badge de estado de ayuda */
+.badge-estado-ayuda {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-estado-ayuda.pendiente {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid #fbbf24;
+}
+
+.badge-estado-ayuda.entregada {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.badge-estado-ayuda.rechazada {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.badge-estado-ayuda.cancelada {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+    border: 1px solid #9ca3af;
+}
+
+/* Vista de detalle */
+.detail-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-section:last-of-type {
+    border-bottom: none;
+}
+
+.detail-section h3 {
+    color: #1f2937;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.detail-observaciones {
+    color: #374151;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Botones de acciones en detalle */
+.detail-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+.btn-edit-detail {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit-detail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-delete-detail {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete-detail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Filtros de ayudas */
+.ayudas-view .filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.ayudas-view .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ayudas-view .filter-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.ayudas-view .filter-select {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ayudas-view .filter-select:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.ayudas-view .filter-select:focus {
+    outline: none;
+    border-color: var(--color-primary-pink);
+    background: white;
+}
+
+.ayudas-view .btn-filter-clear {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.ayudas-view .btn-filter-clear:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Modal de ayuda debe aparecer sobre la vista */
+#ayudaModal {
+    z-index: 10000;
+}
+
+/* Responsive para módulo de ayudas */
+@media (max-width: 768px) {
+    .ayudas-view {
+        padding: 20px 15px;
+    }
+
+    .madres-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .madres-header-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-add-primary,
+    .btn-close-madres {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+    }
+
+    .btn-edit-detail,
+    .btn-delete-detail {
+        width: 100%;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .madres-table-modern {
+        font-size: 13px;
+    }
+
+    .madres-table-modern th,
+    .madres-table-modern td {
+        padding: 10px 8px;
+    }
 }
 

@@ -396,14 +396,18 @@ function renderMadreDetail(madre) {
 function registrarBebe(madreId) {
     // Mostrar modal de bebé
     const modal = document.getElementById('bebeModal');
+    const selectMadreContainer = document.getElementById('selectMadreBebeContainer');
+    
     modal.classList.add('active');
+
+    // Ocultar selector de madre (ya viene desde detalle de madre)
+    selectMadreContainer.style.display = 'none';
 
     // Resetear formulario
     const form = document.getElementById('bebeForm');
     form.reset();
     document.getElementById('bebeId').value = '';
     document.getElementById('bebeMadreId').value = madreId;
-    // document.getElementById('bebeFormTitle').textContent = 'Registrar Bebé'; // Ya no es necesario si el título es fijo en el modal
 
     // Cargar embarazos de la madre para el select
     const selectEmbarazo = document.getElementById('selectEmbarazoBebe');
@@ -430,6 +434,67 @@ function registrarBebe(madreId) {
             console.error('Error cargando embarazos:', err);
             selectEmbarazo.innerHTML = '<option value="">Error al cargar</option>';
         });
+}
+
+// Registrar bebé desde vista global (requiere selección de madre)
+function registrarBebeGlobal() {
+    console.log('Registrar bebé desde vista global');
+    
+    const modal = document.getElementById('bebeModal');
+    const form = document.getElementById('bebeForm');
+    const selectMadreContainer = document.getElementById('selectMadreBebeContainer');
+    const selectEmbarazo = document.getElementById('selectEmbarazoBebe');
+    
+    // Resetear formulario
+    form.reset();
+    document.getElementById('bebeId').value = '';
+    document.getElementById('bebeMadreId').value = '';
+    document.getElementById('searchMadreBebe').value = '';
+    document.getElementById('selectedMadreBebeId').value = '';
+    
+    // Mostrar contenedor de búsqueda de madre
+    selectMadreContainer.style.display = 'block';
+    
+    // Limpiar selector de embarazos
+    selectEmbarazo.innerHTML = '<option value="">Primero busque y seleccione una madre...</option>';
+    
+    // Configurar autocompletado con callback para cargar embarazos
+    setupMadreAutocomplete(
+        'searchMadreBebe',
+        'madreBebeResults',
+        'selectedMadreBebeId',
+        function(madreId) {
+            // Callback cuando se selecciona una madre
+            document.getElementById('bebeMadreId').value = madreId;
+            
+            // Cargar embarazos de la madre seleccionada
+            selectEmbarazo.innerHTML = '<option value="">Cargando...</option>';
+            
+            fetch(`api/embarazos/listar_por_madre.php?madreId=${madreId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        selectEmbarazo.innerHTML = '<option value="">Seleccione Embarazo...</option>';
+                        data.data.forEach(emb => {
+                            const option = document.createElement('option');
+                            option.value = emb.id;
+                            option.textContent = `Embarazo del ${emb.createdAt.substring(0, 10)}`;
+                            selectEmbarazo.appendChild(option);
+                        });
+                    } else {
+                        selectEmbarazo.innerHTML = '<option value="">No hay embarazos registrados</option>';
+                        alert('Esta madre no tiene embarazos registrados. Por favor registre un embarazo primero.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error cargando embarazos:', err);
+                    selectEmbarazo.innerHTML = '<option value="">Error al cargar</option>';
+                });
+        }
+    );
+    
+    // Mostrar modal
+    modal.classList.add('active');
 }
 
 // Volver al detalle de la madre
@@ -471,8 +536,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         alert('Bebé guardado correctamente');
                         closeBebeModal();
                         if (window.currentMadreId) {
+                            // Desde detalle de madre
                             loadBebesByMadre(window.currentMadreId);
                             loadEmbarazosByMadre(window.currentMadreId);
+                        } else {
+                            // Desde vista global
+                            loadGlobalBebes();
                         }
                     } else {
                         alert('Error al guardar: ' + result.error);
@@ -690,9 +759,13 @@ function agregarEmbarazo(madreId) {
     // Obtener el modal y el formulario
     const modal = document.getElementById('embarazoModal');
     const form = document.getElementById('embarazoForm');
+    const selectMadreContainer = document.getElementById('selectMadreEmbarazoContainer');
 
     // Resetear formulario
     form.reset();
+
+    // Ocultar selector de madre (ya viene desde detalle de madre)
+    selectMadreContainer.style.display = 'none';
 
     // Establecer el ID de la madre
     document.getElementById('embarazoMadreId').value = madreId;
@@ -708,6 +781,46 @@ function agregarEmbarazo(madreId) {
     document.getElementById('optionalFields').style.display = 'none';
     document.getElementById('toggleIcon').textContent = '▶';
 
+    // Mostrar modal
+    modal.classList.add('active');
+}
+
+// Agregar embarazo desde vista global (requiere selección de madre)
+function agregarEmbarazoGlobal() {
+    console.log('Agregar embarazo desde vista global');
+    
+    const modal = document.getElementById('embarazoModal');
+    const form = document.getElementById('embarazoForm');
+    const selectMadreContainer = document.getElementById('selectMadreEmbarazoContainer');
+    
+    // Resetear formulario
+    form.reset();
+    document.getElementById('embarazoMadreId').value = '';
+    document.getElementById('searchMadreEmbarazo').value = '';
+    document.getElementById('selectedMadreEmbarazoId').value = '';
+    
+    // Mostrar contenedor de búsqueda de madre
+    selectMadreContainer.style.display = 'block';
+    
+    // Configurar autocompletado
+    setupMadreAutocomplete(
+        'searchMadreEmbarazo',
+        'madreEmbarazoResults',
+        'selectedMadreEmbarazoId',
+        null
+    );
+    
+    // Valores por defecto
+    document.getElementById('totalBebesPorNacer').value = 1;
+    document.getElementById('totalBebesNacidos').value = 0;
+    document.getElementById('bebesNoNacidos').value = 0;
+    document.getElementById('bebesFallecidos').value = 0;
+    document.getElementById('esMultiple').checked = false;
+    
+    // Ocultar campos opcionales
+    document.getElementById('optionalFields').style.display = 'none';
+    document.getElementById('toggleIcon').textContent = '▶';
+    
     // Mostrar modal
     modal.classList.add('active');
 }
@@ -1071,6 +1184,87 @@ function populateSelect(elementId, items) {
     });
 }
 
+// Buscar madres en tiempo real para autocompletado
+let searchMadresTimeout = null;
+let allMadresCache = [];
+
+async function searchMadresAutocomplete(searchTerm, inputId, resultsId, hiddenId, onSelectCallback) {
+    const resultsDiv = document.getElementById(resultsId);
+    
+    if (!searchTerm || searchTerm.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Si no hay cache, cargar todas las madres
+    if (allMadresCache.length === 0) {
+        try {
+            const response = await fetch('api/madres/listar.php?estado=activa&limit=500');
+            const result = await response.json();
+            if (result.success) {
+                allMadresCache = result.data;
+            }
+        } catch (error) {
+            console.error('Error cargando madres:', error);
+            return;
+        }
+    }
+    
+    // Filtrar madres por término de búsqueda
+    const searchLower = searchTerm.toLowerCase();
+    const filtered = allMadresCache.filter(madre => 
+        madre.nombreCompleto.toLowerCase().includes(searchLower) ||
+        (madre.numeroDocumento && madre.numeroDocumento.includes(searchTerm))
+    );
+    
+    // Mostrar resultados
+    if (filtered.length > 0) {
+        resultsDiv.innerHTML = '';
+        filtered.slice(0, 10).forEach(madre => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.innerHTML = `
+                <strong>${madre.nombreCompleto}</strong>
+                <small>${madre.numeroDocumento || 'Sin documento'}</small>
+            `;
+            item.onclick = () => {
+                document.getElementById(inputId).value = madre.nombreCompleto;
+                document.getElementById(hiddenId).value = madre.id;
+                document.getElementById('embarazoMadreId').value = madre.id;
+                resultsDiv.style.display = 'none';
+                if (onSelectCallback) onSelectCallback(madre.id);
+            };
+            resultsDiv.appendChild(item);
+        });
+        resultsDiv.style.display = 'block';
+    } else {
+        resultsDiv.innerHTML = '<div class="autocomplete-item no-results">No se encontraron madres</div>';
+        resultsDiv.style.display = 'block';
+    }
+}
+
+// Configurar autocompletado para input de búsqueda de madre
+function setupMadreAutocomplete(inputId, resultsId, hiddenId, onSelectCallback) {
+    const input = document.getElementById(inputId);
+    const resultsDiv = document.getElementById(resultsId);
+    
+    if (!input) return;
+    
+    input.addEventListener('input', function() {
+        clearTimeout(searchMadresTimeout);
+        searchMadresTimeout = setTimeout(() => {
+            searchMadresAutocomplete(this.value, inputId, resultsId, hiddenId, onSelectCallback);
+        }, 300);
+    });
+    
+    // Cerrar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
 // Manejar envío de formularios
 document.addEventListener('DOMContentLoaded', function () {
     // Formulario de Madres
@@ -1148,8 +1342,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Mostrar mensaje de éxito
                     alert('✅ ' + result.message);
 
-                    // Recargar la lista de embarazos de esta madre
-                    loadEmbarazosByMadre(data.madreId);
+                    // Recargar según el contexto
+                    if (window.currentMadreId) {
+                        // Desde detalle de madre
+                        loadEmbarazosByMadre(data.madreId);
+                    } else {
+                        // Desde vista global
+                        loadGlobalEmbarazos();
+                    }
                 } else {
                     alert('❌ Error: ' + result.error);
                 }
@@ -1585,4 +1785,727 @@ function setupEmbarazosBebesSearch() {
 // Inicializar dashboard
 document.addEventListener('DOMContentLoaded', function () {
     loadDashboardStats();
+    // Configurar listeners del modal de ayuda
+    setupAyudaModalListeners();
 });
+
+// ========================================
+// MÓDULO DE AYUDAS
+// ========================================
+
+// Estado global para ayudas
+let currentAyudasPage = 1;
+let ayudasPerPage = 25;
+let ayudasFilters = {
+    search: '',
+    tipoAyuda: '',
+    origenAyuda: '',
+    estado: ''
+};
+
+// Abrir pantalla de ayudas
+function openAyudasScreen() {
+    const ayudasScreen = document.getElementById('ayudas-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    ayudasScreen.classList.add('active');
+    infoSection.classList.add('module-active');
+    showAyudasListView();
+    
+    loadAyudas();
+    loadAyudasStats();
+    setupAyudasFilters();
+}
+
+// Cerrar pantalla de ayudas
+function closeAyudasScreen() {
+    const ayudasScreen = document.getElementById('ayudas-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    ayudasScreen.classList.remove('active');
+    infoSection.classList.remove('module-active');
+}
+
+// Mostrar vista de lista
+function showAyudasListView() {
+    document.getElementById('ayudas-list-view').classList.add('active');
+    document.getElementById('ayudas-detail-view').classList.remove('active');
+}
+
+// Mostrar vista de detalle
+function showAyudasDetailView() {
+    document.getElementById('ayudas-list-view').classList.remove('active');
+    document.getElementById('ayudas-detail-view').classList.add('active');
+}
+
+// Cargar estadísticas de ayudas
+async function loadAyudasStats() {
+    try {
+        const response = await fetch('api/ayudas/estadisticas.php');
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            document.getElementById('totalAyudas').textContent = data.totalAyudas || 0;
+            document.getElementById('totalValorAyudas').textContent = formatCurrency(data.totalValorEntregado || 0);
+        }
+    } catch (error) {
+        console.error('Error al cargar estadísticas de ayudas:', error);
+    }
+}
+
+// Cargar listado de ayudas
+async function loadAyudas(page = 1) {
+    currentAyudasPage = page;
+    const tableBody = document.getElementById('ayudasTableBody');
+    tableBody.innerHTML = '<tr><td colspan="9" class="td-center">Cargando...</td></tr>';
+
+    try {
+        // Construir URL con parámetros
+        const params = new URLSearchParams({
+            page: page,
+            limit: ayudasPerPage,
+            tipoAyuda: ayudasFilters.tipoAyuda,
+            origenAyuda: ayudasFilters.origenAyuda,
+            estado: ayudasFilters.estado
+        });
+
+        const response = await fetch(`api/ayudas/listar.php?${params}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderAyudasTable(result.data);
+            renderAyudasPagination(result.pagination);
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="9" class="td-center">Error: ${result.error}</td></tr>`;
+        }
+    } catch (error) {
+        console.error('Error al cargar ayudas:', error);
+        tableBody.innerHTML = '<tr><td colspan="9" class="td-center">Error de conexión</td></tr>';
+    }
+}
+
+// Renderizar tabla de ayudas
+function renderAyudasTable(ayudas) {
+    const tableBody = document.getElementById('ayudasTableBody');
+    
+    if (ayudas.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="9" class="td-center">No se encontraron ayudas</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = ayudas.map(ayuda => `
+        <tr>
+            <td>${ayuda.id}</td>
+            <td class="td-nombre">${ayuda.madreNombre}</td>
+            <td>${ayuda.bebeNombre || '-'}</td>
+            <td>${formatTipoAyuda(ayuda.tipoAyuda)}</td>
+            <td>${formatOrigenAyuda(ayuda.origenAyuda)}</td>
+            <td>${formatDate(ayuda.fechaRecepcion)}</td>
+            <td class="td-valor">${formatCurrency(ayuda.valor || 0)}</td>
+            <td><span class="badge-estado-ayuda ${ayuda.estado}">${formatEstadoAyuda(ayuda.estado)}</span></td>
+            <td class="td-actions">
+                <button class="btn-icon-action" title="Ver detalle" onclick="viewAyudaDetail(${ayuda.id})">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM2 8s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"/>
+                    </svg>
+                </button>
+                <button class="btn-icon-action" title="Editar" onclick="editarAyuda(${ayuda.id})">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                    </svg>
+                </button>
+                <button class="btn-icon-action btn-delete" title="Eliminar" onclick="eliminarAyuda(${ayuda.id})">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Renderizar paginación
+function renderAyudasPagination(pagination) {
+    const pageCount = document.getElementById('ayudasPageCount');
+    const pageButtons = document.getElementById('ayudasPageButtons');
+
+    pageCount.textContent = `${pagination.total} registros`;
+
+    const currentPage = pagination.page;
+    const totalPages = pagination.pages;
+
+    let buttonsHTML = '';
+
+    // Botón anterior
+    buttonsHTML += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} 
+                     onclick="loadAyudas(${currentPage - 1})">←</button>`;
+
+    // Números de página
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            buttonsHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                             onclick="loadAyudas(${i})">${i}</button>`;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            buttonsHTML += '<span class="page-ellipsis">...</span>';
+        }
+    }
+
+    // Botón siguiente
+    buttonsHTML += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} 
+                     onclick="loadAyudas(${currentPage + 1})">→</button>`;
+
+    pageButtons.innerHTML = buttonsHTML;
+}
+
+// Configurar filtros y eventos
+function setupAyudasFilters() {
+    // Filtro de búsqueda con debounce
+    const searchInput = document.getElementById('searchAyudas');
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            ayudasFilters.search = e.target.value;
+            loadAyudas(1);
+        }, 500);
+    });
+
+    // Filtros de select
+    document.getElementById('filterTipoAyuda').addEventListener('change', (e) => {
+        ayudasFilters.tipoAyuda = e.target.value;
+        loadAyudas(1);
+    });
+
+    document.getElementById('filterOrigenAyuda').addEventListener('change', (e) => {
+        ayudasFilters.origenAyuda = e.target.value;
+        loadAyudas(1);
+    });
+
+    document.getElementById('filterEstadoAyuda').addEventListener('change', (e) => {
+        ayudasFilters.estado = e.target.value;
+        loadAyudas(1);
+    });
+
+    // Items por página
+    document.getElementById('ayudasPerPage').addEventListener('change', (e) => {
+        ayudasPerPage = parseInt(e.target.value);
+        loadAyudas(1);
+    });
+}
+
+// Limpiar filtros
+function clearAyudasFilters() {
+    document.getElementById('searchAyudas').value = '';
+    document.getElementById('filterTipoAyuda').value = '';
+    document.getElementById('filterOrigenAyuda').value = '';
+    document.getElementById('filterEstadoAyuda').value = '';
+    
+    ayudasFilters = {
+        search: '',
+        tipoAyuda: '',
+        origenAyuda: '',
+        estado: ''
+    };
+    
+    loadAyudas(1);
+}
+
+// ========================================
+// GESTIÓN DE AYUDA (CRUD)
+// ========================================
+
+// Agregar ayuda desde vista global
+function agregarAyudaGlobal() {
+    openAyudaModal();
+    
+    // Mostrar selector de madre
+    document.getElementById('selectMadreAyudaContainer').style.display = 'block';
+    
+    // Resetear formulario
+    document.getElementById('ayudaForm').reset();
+    document.getElementById('ayudaId').value = '';
+    document.getElementById('ayudaMadreId').value = '';
+    document.getElementById('selectedMadreAyudaId').value = '';
+    document.getElementById('searchMadreAyuda').value = '';
+    document.getElementById('selectBebeAyudaContainer').style.display = 'none';
+    
+    // Configurar autocomplete de madre
+    setupMadreAutocompleteAyuda();
+    
+    document.querySelector('#ayudaModal h2').textContent = '🎁 Registrar Nueva Ayuda';
+}
+
+// Agregar ayuda desde una madre específica
+function agregarAyudaParaMadre(madreId) {
+    openAyudaModal();
+    
+    // Ocultar selector de madre
+    document.getElementById('selectMadreAyudaContainer').style.display = 'none';
+    document.getElementById('ayudaMadreId').value = madreId;
+    
+    // Resetear formulario
+    document.getElementById('ayudaForm').reset();
+    document.getElementById('ayudaId').value = '';
+    document.getElementById('selectBebeAyudaContainer').style.display = 'none';
+    
+    document.querySelector('#ayudaModal h2').textContent = '🎁 Registrar Nueva Ayuda';
+}
+
+// Editar ayuda
+async function editarAyuda(ayudaId) {
+    try {
+        const response = await fetch(`api/ayudas/obtener.php?id=${ayudaId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const ayuda = result.data;
+            openAyudaModal();
+
+            // Llenar formulario
+            document.getElementById('ayudaId').value = ayuda.id;
+            document.getElementById('ayudaMadreId').value = ayuda.madreId;
+            document.getElementById('tipoAyuda').value = ayuda.tipoAyuda;
+            document.getElementById('origenAyuda').value = ayuda.origenAyuda;
+            document.getElementById('fechaRecepcion').value = ayuda.fechaRecepcion;
+            document.getElementById('valorAyuda').value = ayuda.valor || '';
+            document.getElementById('estadoAyuda').value = ayuda.estado;
+            document.getElementById('observacionesAyuda').value = ayuda.observaciones || '';
+
+            // Ocultar selector de madre (no se puede cambiar al editar)
+            document.getElementById('selectMadreAyudaContainer').style.display = 'none';
+
+            // Si es ayuda de bebé, cargar bebés y seleccionar
+            if (ayuda.bebeId) {
+                await loadBebesForMadre(ayuda.madreId);
+                document.getElementById('selectBebeAyuda').value = ayuda.bebeId;
+                document.getElementById('selectBebeAyudaContainer').style.display = 'block';
+            }
+
+            document.querySelector('#ayudaModal h2').textContent = '✏️ Editar Ayuda';
+        } else {
+            alert('Error al cargar la ayuda: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al cargar la ayuda');
+    }
+}
+
+// Eliminar ayuda
+async function eliminarAyuda(ayudaId) {
+    if (!confirm('¿Está seguro de eliminar esta ayuda?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('api/ayudas/eliminar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: ayudaId })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Ayuda eliminada correctamente');
+            loadAyudas(currentAyudasPage);
+            loadAyudasStats();
+        } else {
+            alert('Error al eliminar: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+// Ver detalle de ayuda
+async function viewAyudaDetail(ayudaId) {
+    try {
+        const response = await fetch(`api/ayudas/obtener.php?id=${ayudaId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const ayuda = result.data;
+            renderAyudaDetail(ayuda);
+            showAyudasDetailView();
+        } else {
+            alert('Error al cargar detalle: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+// Renderizar detalle de ayuda
+function renderAyudaDetail(ayuda) {
+    const detailContent = document.getElementById('ayudaDetailContent');
+    
+    detailContent.innerHTML = `
+        <div class="detail-card">
+            <div class="detail-section">
+                <h3>🎁 Información General</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">ID:</span>
+                        <span class="detail-value">#${ayuda.id}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tipo de Ayuda:</span>
+                        <span class="detail-value">${formatTipoAyuda(ayuda.tipoAyuda)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Origen:</span>
+                        <span class="detail-value">${formatOrigenAyuda(ayuda.origenAyuda)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="badge-estado-ayuda ${ayuda.estado}">${formatEstadoAyuda(ayuda.estado)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h3>👩 Beneficiaria</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Madre:</span>
+                        <span class="detail-value">${ayuda.madreNombre}</span>
+                    </div>
+                    ${ayuda.bebeNombre ? `
+                    <div class="detail-item">
+                        <span class="detail-label">Bebé:</span>
+                        <span class="detail-value">${ayuda.bebeNombre}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h3>📅 Información de Entrega</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de Recepción:</span>
+                        <span class="detail-value">${formatDate(ayuda.fechaRecepcion)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Valor:</span>
+                        <span class="detail-value">${formatCurrency(ayuda.valor || 0)}</span>
+                    </div>
+                </div>
+            </div>
+
+            ${ayuda.observaciones ? `
+            <div class="detail-section">
+                <h3>📝 Observaciones</h3>
+                <p class="detail-observaciones">${ayuda.observaciones}</p>
+            </div>
+            ` : ''}
+
+            <div class="detail-section">
+                <h3>ℹ️ Información del Registro</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Creado:</span>
+                        <span class="detail-value">${formatDateTime(ayuda.createdAt)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Última actualización:</span>
+                        <span class="detail-value">${formatDateTime(ayuda.updatedAt)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-actions">
+                <button class="btn-edit-detail" onclick="editarAyuda(${ayuda.id})">
+                    ✏️ Editar Ayuda
+                </button>
+                <button class="btn-delete-detail" onclick="eliminarAyuda(${ayuda.id})">
+                    🗑️ Eliminar Ayuda
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// ========================================
+// MODAL DE AYUDA
+// ========================================
+
+function openAyudaModal() {
+    const modal = document.getElementById('ayudaModal');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Modal de ayuda abierto');
+    } else {
+        console.error('No se encontró el modal de ayuda');
+    }
+}
+
+function closeAyudaModal() {
+    const modal = document.getElementById('ayudaModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.getElementById('ayudaForm').reset();
+    }
+}
+
+// Cerrar modal al hacer clic fuera - Se configura después del DOM
+function setupAyudaModalListeners() {
+    const ayudaModal = document.getElementById('ayudaModal');
+    if (!ayudaModal) return;
+    
+    ayudaModal.addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeAyudaModal();
+        }
+    });
+
+    // Manejar cambio de tipo de ayuda (mostrar/ocultar selector de bebé)
+    document.getElementById('tipoAyuda').addEventListener('change', function() {
+        const tiposParaBebe = ['kit_recien_nacido', 'salud_recien_nacido', 'elementos_recien_nacido'];
+        const selectBebeContainer = document.getElementById('selectBebeAyudaContainer');
+        const selectBebe = document.getElementById('selectBebeAyuda');
+        
+        if (tiposParaBebe.includes(this.value)) {
+            selectBebeContainer.style.display = 'block';
+            selectBebe.required = true;
+            
+            // Si hay madre seleccionada, cargar sus bebés
+            const madreId = document.getElementById('ayudaMadreId').value;
+            if (madreId) {
+                loadBebesForMadre(madreId);
+            }
+        } else {
+            selectBebeContainer.style.display = 'none';
+            selectBebe.required = false;
+            selectBebe.value = '';
+        }
+    });
+
+    // Enviar formulario de ayuda
+    document.getElementById('ayudaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const data = {
+            id: formData.get('id') || undefined,
+            madreId: document.getElementById('ayudaMadreId').value || document.getElementById('selectedMadreAyudaId').value,
+            bebeId: formData.get('bebeId') || undefined,
+            tipoAyuda: formData.get('tipoAyuda'),
+            origenAyuda: formData.get('origenAyuda'),
+            fechaRecepcion: formData.get('fechaRecepcion'),
+            valor: formData.get('valor') ? parseFloat(formData.get('valor')) : 0,
+            estado: formData.get('estado'),
+            observaciones: formData.get('observaciones') || undefined
+        };
+
+        // Validar madre
+        if (!data.madreId) {
+            alert('Debe seleccionar una madre');
+            return;
+        }
+
+        // Validar bebé si es requerido
+        const tiposParaBebe = ['kit_recien_nacido', 'salud_recien_nacido', 'elementos_recien_nacido'];
+        if (tiposParaBebe.includes(data.tipoAyuda) && !data.bebeId) {
+            alert('Debe seleccionar un bebé para este tipo de ayuda');
+            return;
+        }
+
+        try {
+            const response = await fetch('api/ayudas/guardar.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                closeAyudaModal();
+                loadAyudas(currentAyudasPage);
+                loadAyudasStats();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    });
+}
+
+// Configurar autocomplete de madre para ayudas
+let madreAyudaAutocompleteInitialized = false;
+
+function setupMadreAutocompleteAyuda() {
+    const searchInput = document.getElementById('searchMadreAyuda');
+    const resultsDiv = document.getElementById('madreAyudaResults');
+    const hiddenInput = document.getElementById('selectedMadreAyudaId');
+    
+    // Solo configurar una vez
+    if (madreAyudaAutocompleteInitialized) {
+        return;
+    }
+    
+    let searchTimeout;
+
+    searchInput.addEventListener('input', async (e) => {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            hiddenInput.value = '';
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            // Cargar cache si está vacío
+            if (allMadresCache.length === 0) {
+                try {
+                    const response = await fetch('api/madres/listar.php?estado=activa&limit=500');
+                    const result = await response.json();
+                    if (result.success) {
+                        allMadresCache = result.data;
+                        console.log('Cache de madres cargado:', allMadresCache.length, 'madres');
+                    } else {
+                        console.error('Error al cargar madres:', result.error);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error de conexión al cargar madres:', error);
+                    return;
+                }
+            }
+
+            const filtered = allMadresCache.filter(madre =>
+                madre.nombreCompleto.toLowerCase().includes(query.toLowerCase()) ||
+                (madre.numeroDocumento && madre.numeroDocumento.includes(query))
+            ).slice(0, 10);
+
+            if (filtered.length > 0) {
+                resultsDiv.innerHTML = filtered.map(madre => `
+                    <div class="autocomplete-item" data-id="${madre.id}">
+                        <strong>${madre.nombreCompleto}</strong>
+                        <small>(${madre.numeroDocumento || 'N/A'})</small>
+                    </div>
+                `).join('');
+                resultsDiv.style.display = 'block';
+
+                // Agregar eventos de clic
+                resultsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', async () => {
+                        const madreId = item.dataset.id;
+                        const madreName = item.querySelector('strong').textContent;
+                        searchInput.value = madreName;
+                        hiddenInput.value = madreId;
+                        document.getElementById('ayudaMadreId').value = madreId;
+                        resultsDiv.style.display = 'none';
+                        
+                        // Cargar bebés de esta madre
+                        await loadBebesForMadre(madreId);
+                    });
+                });
+            } else {
+                resultsDiv.innerHTML = '<div class="no-results">No se encontraron madres</div>';
+                resultsDiv.style.display = 'block';
+                hiddenInput.value = '';
+            }
+        }, 300);
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+    
+    madreAyudaAutocompleteInitialized = true;
+    console.log('Autocomplete de madre para ayuda configurado');
+}
+
+// Cargar bebés de una madre para el selector
+async function loadBebesForMadre(madreId) {
+    try {
+        const response = await fetch(`api/bebes/listar_por_madre.php?madreId=${madreId}`);
+        const result = await response.json();
+
+        const selectBebe = document.getElementById('selectBebeAyuda');
+        
+        if (result.success && result.data.length > 0) {
+            selectBebe.innerHTML = '<option value="">Seleccione un bebé...</option>' +
+                result.data.map(bebe => 
+                    `<option value="${bebe.id}">${bebe.nombre} (${formatDate(bebe.fechaNacimiento)})</option>`
+                ).join('');
+        } else {
+            selectBebe.innerHTML = '<option value="">No hay bebés registrados</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar bebés:', error);
+    }
+}
+
+
+// ========================================
+// FUNCIONES HELPER PARA AYUDAS
+// ========================================
+
+function formatTipoAyuda(tipo) {
+    const tipos = {
+        'economica': '💰 Económica',
+        'transporte': '🚌 Transporte',
+        'habitabilidad': '🏠 Habitabilidad',
+        'alimentos': '🍎 Alimentos',
+        'medicamentos': '💊 Medicamentos',
+        'humanitaria': '🆘 Humanitaria',
+        'kit_recien_nacido': '👶 Kit Recién Nacido',
+        'salud_recien_nacido': '🏥 Salud Recién Nacido',
+        'elementos_recien_nacido': '🧸 Elementos Recién Nacido'
+    };
+    return tipos[tipo] || tipo;
+}
+
+function formatOrigenAyuda(origen) {
+    const origenes = {
+        'corporacion': '🏢 Corporación Adonai',
+        'programa_externo': '🤝 Programa Externo'
+    };
+    return origenes[origen] || origen;
+}
+
+function formatEstadoAyuda(estado) {
+    const estados = {
+        'pendiente': '⏳ Pendiente',
+        'entregada': '✅ Entregada',
+        'rechazada': '❌ Rechazada',
+        'cancelada': '🚫 Cancelada'
+    };
+    return estados[estado] || estado;
+}
+
+function formatCurrency(value) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    }).format(value);
+}
+
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return 'N/A';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}

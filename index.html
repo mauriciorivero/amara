@@ -517,10 +517,15 @@
                         <div class="card-title" style="color: #ddd;">Nuestras</div>
                         <div class="card-main-title" style="color: white;">Ayudas</div>
                     </div>
-                    <div class="arrow-icon" onclick="openAyudasModal()">↗</div>
+                    <div class="arrow-icon" onclick="openAyudasScreen()">↗</div>
                 </div>
-                <div class="chart">
-                    <!-- Contenido próximamente -->
+                <div class="stat-item">
+                    <div class="stat-icon">🎁</div>
+                    <div class="stat-text"><span id="totalAyudas">0</span> Total Ayudas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-text">$<span id="totalValorAyudas">0</span> Entregado</div>
                 </div>
             </div>
             <!-- Pantalla de Embarazos y Bebés (Inline) -->
@@ -553,6 +558,9 @@
                             <div class="column-header">
                                 <h3>Historial de Embarazos</h3>
                                 <span class="badge-count" id="globalEmbarazosCount">0</span>
+                                <button class="btn-add-embarazo" onclick="agregarEmbarazoGlobal()">
+                                    <span>+</span> Nuevo Embarazo
+                                </button>
                             </div>
                             <div class="list-container" id="globalEmbarazosList">
                                 <div class="loading-spinner">Cargando embarazos...</div>
@@ -564,6 +572,9 @@
                             <div class="column-header">
                                 <h3>Registro de Bebés</h3>
                                 <span class="badge-count" id="globalBebesCount">0</span>
+                                <button class="btn-add-embarazo" onclick="registrarBebeGlobal()">
+                                    <span>+</span> Nuevo Bebé
+                                </button>
                             </div>
                             <div class="list-container" id="globalBebesList">
                                 <div class="loading-spinner">Cargando bebés...</div>
@@ -582,6 +593,144 @@
                     </div>
                     <div id="detail-view-content">
                         <!-- El contenido se cargará dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de Ayudas -->
+            <div class="module-screen" id="ayudas-screen">
+                <!-- Vista Principal: Lista de Ayudas -->
+                <div class="ayudas-view active" id="ayudas-list-view">
+                    <div class="madres-header" style="padding: 20px 30px; margin: 0;">
+                        <h2 class="madres-title">🎁 Gestión de Ayudas</h2>
+                        <div class="madres-header-buttons">
+                            <button class="btn-add-primary" onclick="agregarAyudaGlobal()">
+                                <span class="btn-icon">+</span>
+                                Registrar Nueva Ayuda
+                            </button>
+                            <button class="btn-close-madres" onclick="closeAyudasScreen()">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar Módulo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <input type="text" id="searchAyudas" class="filter-input search-input" 
+                                   placeholder="🔍 Buscar por nombre de madre...">
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Tipo de Ayuda</label>
+                                <select id="filterTipoAyuda" class="filter-select">
+                                    <option value="">Todas</option>
+                                    <option value="economica">Económica</option>
+                                    <option value="transporte">Transporte</option>
+                                    <option value="habitabilidad">Habitabilidad</option>
+                                    <option value="alimentos">Alimentos</option>
+                                    <option value="medicamentos">Medicamentos</option>
+                                    <option value="humanitaria">Humanitaria</option>
+                                    <option value="kit_recien_nacido">Kit Recién Nacido</option>
+                                    <option value="salud_recien_nacido">Salud Recién Nacido</option>
+                                    <option value="elementos_recien_nacido">Elementos Recién Nacido</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Origen</label>
+                                <select id="filterOrigenAyuda" class="filter-select">
+                                    <option value="">Todos</option>
+                                    <option value="corporacion">Corporación Adonai</option>
+                                    <option value="programa_externo">Programa Externo</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Estado</label>
+                                <select id="filterEstadoAyuda" class="filter-select">
+                                    <option value="">Todos</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="entregada">Entregada</option>
+                                    <option value="rechazada">Rechazada</option>
+                                    <option value="cancelada">Cancelada</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-filter-clear" onclick="clearAyudasFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Ayudas -->
+                    <div class="table-wrapper">
+                        <table class="madres-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Madre</th>
+                                    <th>Bebé</th>
+                                    <th>Tipo de Ayuda</th>
+                                    <th>Origen</th>
+                                    <th>Fecha Recepción</th>
+                                    <th>Valor</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ayudasTableBody">
+                                <tr>
+                                    <td colspan="9" class="td-center">Cargando ayudas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination-modern">
+                        <div class="pagination-info">
+                            Mostrando <span class="per-page-select">
+                                <select id="ayudasPerPage">
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </span> por página
+                        </div>
+                        <div class="pagination-controls">
+                            <span class="page-count" id="ayudasPageCount">0 registros</span>
+                            <div class="page-buttons" id="ayudasPageButtons">
+                                <button class="page-btn" disabled>←</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn" disabled>→</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalle de Ayuda -->
+                <div class="ayudas-view" id="ayudas-detail-view">
+                    <div class="detail-header" style="padding: 20px 30px; margin: 0; background: white; border-bottom: 1px solid #e5e7eb;">
+                        <button class="btn-back" onclick="showAyudasListView()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
+                            </svg>
+                            Volver al listado
+                        </button>
+                        <h2 class="detail-title" style="color: #1f2937; margin: 0;">Detalle de Ayuda</h2>
+                        <button class="btn-close-madres" onclick="closeAyudasScreen()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cerrar
+                        </button>
+                    </div>
+
+                    <div class="detail-content" id="ayudaDetailContent" style="padding: 30px;">
+                        <p class="no-data" style="text-align: center; color: #6b7280;">Seleccione una ayuda para ver sus detalles</p>
                     </div>
                 </div>
             </div>
@@ -611,6 +760,23 @@
             <form id="embarazoForm" class="embarazo-form">
                 <input type="hidden" id="embarazoMadreId" name="madreId">
 
+                <!-- Selector de Madre (visible solo en vista global) -->
+                <div class="form-group-embarazo full-width" id="selectMadreEmbarazoContainer" style="display: none;">
+                    <label for="searchMadreEmbarazo">
+                        <span class="label-icon">👩</span>
+                        Buscar Madre
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" 
+                           id="searchMadreEmbarazo" 
+                           class="form-input-embarazo"
+                           placeholder="Escriba el nombre o documento de la madre..."
+                           autocomplete="off">
+                    <input type="hidden" id="selectedMadreEmbarazoId" name="madreIdSelected">
+                    <div id="madreEmbarazoResults" class="autocomplete-results" style="display: none;"></div>
+                    <small class="form-hint">Escriba para buscar la madre de este embarazo</small>
+                </div>
+
                 <div class="form-group-embarazo">
                     <label for="totalBebesPorNacer">
                         <span class="label-icon">🤰</span>
@@ -634,7 +800,7 @@
                     <small class="form-hint">Marque si espera más de un bebé</small>
                 </div>
 
-                <div class="form-group-embarazo form-group-optional">
+                <div class="form-group-embarazo form-group-optional full-width">
                     <button type="button" class="btn-toggle-optional" onclick="toggleOptionalFields()">
                         <span id="toggleIcon">▶</span>
                         Campos adicionales (opcional)
@@ -670,11 +836,11 @@
                     </div>
                 </div>
 
-                <div class="form-alert-info">
+                <div class="form-alert-info full-width">
                     ℹ️ Los contadores se actualizarán automáticamente al registrar los bebés
                 </div>
 
-                <div class="modal-actions">
+                <div class="modal-actions full-width">
                     <button type="button" class="btn-cancel-modal" onclick="closeEmbarazoModal()">
                         Cancelar
                     </button>
@@ -698,7 +864,24 @@
                 <input type="hidden" id="bebeId" name="id">
                 <input type="hidden" id="bebeMadreId" name="madreId">
 
-                <div class="form-group-embarazo">
+                <!-- Selector de Madre (visible solo en vista global) -->
+                <div class="form-group-embarazo full-width" id="selectMadreBebeContainer" style="display: none;">
+                    <label for="searchMadreBebe">
+                        <span class="label-icon">👩</span>
+                        Buscar Madre
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" 
+                           id="searchMadreBebe" 
+                           class="form-input-embarazo"
+                           placeholder="Escriba el nombre o documento de la madre..."
+                           autocomplete="off">
+                    <input type="hidden" id="selectedMadreBebeId" name="madreIdSelected">
+                    <div id="madreBebeResults" class="autocomplete-results" style="display: none;"></div>
+                    <small class="form-hint">Escriba para buscar la madre de este bebé</small>
+                </div>
+
+                <div class="form-group-embarazo full-width">
                     <label>Embarazo Asociado *</label>
                     <select name="embarazoId" id="selectEmbarazoBebe" required class="form-input-embarazo">
                         <option value="">Cargando...</option>
@@ -740,7 +923,7 @@
                     <input type="date" name="fechaIncidente" class="form-input-embarazo">
                 </div>
 
-                <div class="form-group-embarazo">
+                <div class="form-group-embarazo full-width">
                     <label class="checkbox-label">
                         <input type="checkbox" name="esMellizo" value="1" class="form-checkbox-embarazo">
                         <span class="checkbox-custom"></span>
@@ -748,12 +931,12 @@
                     </label>
                 </div>
 
-                <div class="form-group-embarazo">
+                <div class="form-group-embarazo full-width">
                     <label>Observaciones</label>
                     <textarea name="observaciones" rows="3" class="form-input-embarazo"></textarea>
                 </div>
 
-                <div class="modal-actions">
+                <div class="modal-actions full-width">
                     <button type="button" class="btn-cancel-modal" onclick="closeBebeModal()">Cancelar</button>
                     <button type="submit" class="btn-save-modal">
                         <span>💾</span> Guardar Bebé
@@ -771,6 +954,135 @@
             <div id="viewBebesContent" class="modal-bebes-list-container">
                 <!-- Contenido dinámico -->
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro/Edición de Ayuda -->
+    <div class="modal" id="ayudaModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeAyudaModal()">×</button>
+            <h2>🎁 Registrar Ayuda</h2>
+            <p class="modal-subtitle">Complete la información de la ayuda</p>
+
+            <form id="ayudaForm" class="embarazo-form">
+                <input type="hidden" id="ayudaId" name="id">
+                <input type="hidden" id="ayudaMadreId" name="madreId">
+
+                <!-- Selector de Madre (visible solo en vista global) -->
+                <div class="form-group-embarazo full-width" id="selectMadreAyudaContainer" style="display: none;">
+                    <label for="searchMadreAyuda">
+                        <span class="label-icon">👩</span>
+                        Buscar Madre
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" 
+                           id="searchMadreAyuda" 
+                           class="form-input-embarazo"
+                           placeholder="Escriba el nombre o documento de la madre..."
+                           autocomplete="off">
+                    <input type="hidden" id="selectedMadreAyudaId" name="madreIdSelected">
+                    <div id="madreAyudaResults" class="autocomplete-results" style="display: none;"></div>
+                    <small class="form-hint">Escriba para buscar la madre</small>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label for="tipoAyuda">
+                        <span class="label-icon">📦</span>
+                        Tipo de Ayuda
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="tipoAyuda" name="tipoAyuda" required class="form-input-embarazo">
+                        <option value="">Seleccione...</option>
+                        <option value="economica">💰 Económica</option>
+                        <option value="transporte">🚌 Transporte</option>
+                        <option value="habitabilidad">🏠 Habitabilidad</option>
+                        <option value="alimentos">🍎 Alimentos</option>
+                        <option value="medicamentos">💊 Medicamentos</option>
+                        <option value="humanitaria">🆘 Humanitaria</option>
+                        <option value="kit_recien_nacido">👶 Kit Recién Nacido</option>
+                        <option value="salud_recien_nacido">🏥 Salud Recién Nacido</option>
+                        <option value="elementos_recien_nacido">🧸 Elementos Recién Nacido</option>
+                    </select>
+                    <small class="form-hint">Seleccione el tipo de ayuda</small>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label for="origenAyuda">
+                        <span class="label-icon">🏢</span>
+                        Origen de la Ayuda
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="origenAyuda" name="origenAyuda" required class="form-input-embarazo">
+                        <option value="corporacion">Corporación Adonai</option>
+                        <option value="programa_externo">Programa Externo</option>
+                    </select>
+                </div>
+
+                <!-- Selector de Bebé (visible solo para ayudas de recién nacido) -->
+                <div class="form-group-embarazo full-width" id="selectBebeAyudaContainer" style="display: none;">
+                    <label for="selectBebeAyuda">
+                        <span class="label-icon">👶</span>
+                        Seleccione el Bebé
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="selectBebeAyuda" name="bebeId" class="form-input-embarazo">
+                        <option value="">Primero seleccione una madre...</option>
+                    </select>
+                    <small class="form-hint">Esta ayuda es específica para un bebé</small>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label for="fechaRecepcion">
+                        <span class="label-icon">📅</span>
+                        Fecha de Recepción
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="date" id="fechaRecepcion" name="fechaRecepcion" required class="form-input-embarazo">
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label for="valorAyuda">
+                        <span class="label-icon">💵</span>
+                        Valor (opcional)
+                    </label>
+                    <input type="number" id="valorAyuda" name="valor" min="0" step="0.01" 
+                           placeholder="0.00" class="form-input-embarazo">
+                    <small class="form-hint">Valor monetario de la ayuda</small>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label for="estadoAyuda">
+                        <span class="label-icon">✅</span>
+                        Estado
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="estadoAyuda" name="estado" required class="form-input-embarazo">
+                        <option value="pendiente">⏳ Pendiente</option>
+                        <option value="entregada">✅ Entregada</option>
+                        <option value="rechazada">❌ Rechazada</option>
+                        <option value="cancelada">🚫 Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="form-group-embarazo full-width">
+                    <label for="observacionesAyuda">
+                        <span class="label-icon">📝</span>
+                        Observaciones
+                    </label>
+                    <textarea id="observacionesAyuda" name="observaciones" rows="3" 
+                              class="form-input-embarazo" placeholder="Detalles adicionales..."></textarea>
+                </div>
+
+                <div class="modal-actions full-width">
+                    <button type="button" class="btn-cancel-modal" onclick="closeAyudaModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-save-modal">
+                        <span>💾</span>
+                        Guardar Ayuda
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
     </div>
