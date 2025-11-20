@@ -1787,6 +1787,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadDashboardStats();
     // Configurar listeners del modal de ayuda
     setupAyudaModalListeners();
+    // Cargar estadísticas de aliados y programas
+    loadAliadosStats();
+    loadProgramasStats();
 });
 
 // ========================================
@@ -2508,4 +2511,1055 @@ function formatDateTime(dateTimeString) {
         hour: '2-digit',
         minute: '2-digit'
     });
+}
+
+// ========================================
+// GESTIÓN DE ALIADOS
+// ========================================
+
+// Variables globales para Aliados
+let currentAliadosPage = 1;
+let aliadosPerPage = 25;
+let aliadosFilters = { search: '', estado: '' };
+
+// Abrir pantalla de aliados
+function openAliadosScreen() {
+    const aliadosScreen = document.getElementById('aliados-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    aliadosScreen.classList.add('active');
+    infoSection.classList.add('madres-active');
+    showAliadosListView();
+    loadAliados(1);
+    setupAliadosFilters();
+}
+
+// Cerrar pantalla de aliados
+function closeAliadosScreen() {
+    const aliadosScreen = document.getElementById('aliados-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    aliadosScreen.classList.remove('active');
+    infoSection.classList.remove('madres-active');
+}
+
+// Mostrar vista de lista
+function showAliadosListView() {
+    document.getElementById('aliados-list-view').classList.add('active');
+    document.getElementById('aliados-detail-view').classList.remove('active');
+}
+
+// Mostrar vista de detalle
+function showAliadosDetailView() {
+    document.getElementById('aliados-list-view').classList.remove('active');
+    document.getElementById('aliados-detail-view').classList.add('active');
+}
+
+// Cargar aliados con paginación y filtros
+async function loadAliados(page = 1) {
+    currentAliadosPage = page;
+    aliadosPerPage = document.getElementById('aliadosPerPage')?.value || 25;
+
+    const params = new URLSearchParams({
+        page: currentAliadosPage,
+        per_page: aliadosPerPage,
+        search: aliadosFilters.search || '',
+        estado: aliadosFilters.estado || ''
+    });
+
+    try {
+        const response = await fetch(`api/aliados/listar.php?${params}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderAliadosTable(result.data);
+            renderAliadosPagination(result.pagination);
+        } else {
+            console.error('Error al cargar aliados:', result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Renderizar tabla de aliados
+function renderAliadosTable(aliados) {
+    const tbody = document.getElementById('aliadosTableBody');
+
+    if (!aliados || aliados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="td-center">No se encontraron aliados</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = aliados.map(aliado => `
+        <tr>
+            <td>${aliado.id}</td>
+            <td><strong>${aliado.nombre || 'N/A'}</strong></td>
+            <td>${aliado.contactoNombre || 'N/A'}</td>
+            <td>${aliado.contactoTelefono || 'N/A'}</td>
+            <td>${aliado.contactoCorreo || 'N/A'}</td>
+            <td>${formatEstadoAliado(aliado.estado)}</td>
+            <td><span class="badge">${aliado.totalProgramas || 0}</span></td>
+            <td>
+                <button class="btn-action btn-view" onclick="viewAliadoDetail(${aliado.id})" title="Ver detalle">
+                    👁️
+                </button>
+                <button class="btn-action btn-edit" onclick="editarAliado(${aliado.id})" title="Editar">
+                    ✏️
+                </button>
+                <button class="btn-action btn-delete" onclick="eliminarAliado(${aliado.id})" title="Eliminar">
+                    🗑️
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Renderizar paginación
+function renderAliadosPagination(pagination) {
+    const pageCount = document.getElementById('aliadosPageCount');
+    const pageButtons = document.getElementById('aliadosPageButtons');
+
+    if (pageCount) {
+        pageCount.textContent = `${pagination.total} registros`;
+    }
+
+    if (pageButtons) {
+        let buttonsHTML = '';
+        
+        // Botón anterior
+        buttonsHTML += `<button class="page-btn" ${currentAliadosPage === 1 ? 'disabled' : ''} 
+                        onclick="loadAliados(${currentAliadosPage - 1})">←</button>`;
+        
+        // Botones de páginas
+        for (let i = 1; i <= pagination.totalPages; i++) {
+            if (i === 1 || i === pagination.totalPages || (i >= currentAliadosPage - 1 && i <= currentAliadosPage + 1)) {
+                buttonsHTML += `<button class="page-btn ${i === currentAliadosPage ? 'active' : ''}" 
+                                onclick="loadAliados(${i})">${i}</button>`;
+            } else if (i === currentAliadosPage - 2 || i === currentAliadosPage + 2) {
+                buttonsHTML += '<span class="page-ellipsis">...</span>';
+            }
+        }
+        
+        // Botón siguiente
+        buttonsHTML += `<button class="page-btn" ${currentAliadosPage === pagination.totalPages ? 'disabled' : ''} 
+                        onclick="loadAliados(${currentAliadosPage + 1})">→</button>`;
+        
+        pageButtons.innerHTML = buttonsHTML;
+    }
+}
+
+// Configurar filtros
+function setupAliadosFilters() {
+    const searchInput = document.getElementById('searchAliados');
+    const estadoFilter = document.getElementById('filterEstadoAliado');
+    const perPageSelect = document.getElementById('aliadosPerPage');
+
+    if (searchInput && !searchInput.dataset.listenerAttached) {
+        searchInput.addEventListener('input', debounce(function() {
+            aliadosFilters.search = this.value;
+            loadAliados(1);
+        }, 500));
+        searchInput.dataset.listenerAttached = 'true';
+    }
+
+    if (estadoFilter && !estadoFilter.dataset.listenerAttached) {
+        estadoFilter.addEventListener('change', function() {
+            aliadosFilters.estado = this.value;
+            loadAliados(1);
+        });
+        estadoFilter.dataset.listenerAttached = 'true';
+    }
+
+    if (perPageSelect && !perPageSelect.dataset.listenerAttached) {
+        perPageSelect.addEventListener('change', function() {
+            loadAliados(1);
+        });
+        perPageSelect.dataset.listenerAttached = 'true';
+    }
+}
+
+// Limpiar filtros
+function clearAliadosFilters() {
+    aliadosFilters = { search: '', estado: '' };
+    document.getElementById('searchAliados').value = '';
+    document.getElementById('filterEstadoAliado').value = '';
+    loadAliados(1);
+}
+
+// Abrir modal para agregar aliado
+function agregarAliado() {
+    document.getElementById('aliadoId').value = '';
+    document.getElementById('aliadoForm').reset();
+    document.querySelector('#aliadoModal h2').textContent = '🤝 Registrar Aliado';
+    openAliadoModal();
+    loadOrientadorasForAliado();
+}
+
+// Editar aliado
+async function editarAliado(id) {
+    try {
+        const response = await fetch(`api/aliados/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const aliado = result.data;
+            document.getElementById('aliadoId').value = aliado.id;
+            document.getElementById('aliadoNombre').value = aliado.nombre || '';
+            document.getElementById('aliadoDescripcion').value = aliado.descripcion || '';
+            document.getElementById('aliadoContactoNombre').value = aliado.contactoNombre || '';
+            document.getElementById('aliadoContactoCargo').value = aliado.contactoCargo || '';
+            document.getElementById('aliadoContactoTelefono').value = aliado.contactoTelefono || '';
+            document.getElementById('aliadoContactoCorreo').value = aliado.contactoCorreo || '';
+            document.getElementById('aliadoVinculadorNombre').value = aliado.vinculadorNombre || '';
+            document.getElementById('aliadoVinculadorTelefono').value = aliado.vinculadorTelefono || '';
+            document.getElementById('aliadoVinculadorCorreo').value = aliado.vinculadorCorreo || '';
+            document.getElementById('aliadoDireccion').value = aliado.direccion || '';
+            document.getElementById('aliadoEstado').value = aliado.estado || 'activo';
+            
+            if (aliado.orientadora && aliado.orientadora.id) {
+                document.getElementById('aliadoOrientadora').value = aliado.orientadora.id;
+            }
+
+            document.querySelector('#aliadoModal h2').textContent = '🤝 Editar Aliado';
+            openAliadoModal();
+            loadOrientadorasForAliado();
+        } else {
+            alert('Error al cargar el aliado: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar el aliado');
+    }
+}
+
+// Eliminar aliado
+async function eliminarAliado(id) {
+    if (!confirm('¿Está seguro de eliminar este aliado? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('api/aliados/eliminar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Aliado eliminado exitosamente');
+            loadAliados(currentAliadosPage);
+            loadAliadosStats();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el aliado');
+    }
+}
+
+// Ver detalle de aliado
+async function viewAliadoDetail(id) {
+    try {
+        const response = await fetch(`api/aliados/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderAliadoDetail(result.data);
+            showAliadosDetailView();
+        } else {
+            alert('Error al cargar el detalle: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar el detalle');
+    }
+}
+
+// Renderizar detalle del aliado
+function renderAliadoDetail(aliado) {
+    const detailContent = document.getElementById('aliadoDetailContent');
+    
+    detailContent.innerHTML = `
+        <div class="detail-section">
+            <h3>Información General</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>ID:</label>
+                    <span>${aliado.id}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span><strong>${aliado.nombre || 'N/A'}</strong></span>
+                </div>
+                <div class="detail-item">
+                    <label>Estado:</label>
+                    <span>${formatEstadoAliado(aliado.estado)}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Descripción:</label>
+                    <span>${aliado.descripcion || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Información de Contacto</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Persona de Contacto:</label>
+                    <span>${aliado.contactoNombre || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Cargo:</label>
+                    <span>${aliado.contactoCargo || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Teléfono:</label>
+                    <span>${aliado.contactoTelefono || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Correo:</label>
+                    <span>${aliado.contactoCorreo || 'N/A'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Dirección:</label>
+                    <span>${aliado.direccion || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Información del Vinculador</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span>${aliado.vinculadorNombre || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Teléfono:</label>
+                    <span>${aliado.vinculadorTelefono || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Correo:</label>
+                    <span>${aliado.vinculadorCorreo || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Información de Registro</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Orientadora:</label>
+                    <span>${aliado.orientadora ? aliado.orientadora.nombre : 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha de Registro:</label>
+                    <span>${formatDateTime(aliado.createdAt)}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Última Actualización:</label>
+                    <span>${formatDateTime(aliado.updatedAt)}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            <button class="btn-action btn-edit" onclick="editarAliado(${aliado.id})">
+                ✏️ Editar
+            </button>
+            <button class="btn-action btn-delete" onclick="eliminarAliado(${aliado.id})">
+                🗑️ Eliminar
+            </button>
+        </div>
+    `;
+}
+
+// Abrir modal
+function openAliadoModal() {
+    document.getElementById('aliadoModal').classList.add('active');
+}
+
+// Cerrar modal
+function closeAliadoModal() {
+    document.getElementById('aliadoModal').classList.remove('active');
+}
+
+// Cargar orientadoras para selector
+async function loadOrientadorasForAliado() {
+    try {
+        const response = await fetch('api/orientadoras/listar.php?all=true');
+        const result = await response.json();
+
+        if (result.success) {
+            const select = document.getElementById('aliadoOrientadora');
+            select.innerHTML = '<option value="">Seleccione...</option>';
+            result.data.forEach(orientadora => {
+                select.innerHTML += `<option value="${orientadora.id}">${orientadora.nombre}</option>`;
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar orientadoras:', error);
+    }
+}
+
+// Manejar envío del formulario de aliado
+document.addEventListener('DOMContentLoaded', function () {
+    const aliadoForm = document.getElementById('aliadoForm');
+    if (aliadoForm) {
+        aliadoForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                id: document.getElementById('aliadoId').value || null,
+                nombre: document.getElementById('aliadoNombre').value,
+                descripcion: document.getElementById('aliadoDescripcion').value,
+                contactoNombre: document.getElementById('aliadoContactoNombre').value,
+                contactoCargo: document.getElementById('aliadoContactoCargo').value,
+                contactoTelefono: document.getElementById('aliadoContactoTelefono').value,
+                contactoCorreo: document.getElementById('aliadoContactoCorreo').value,
+                vinculadorNombre: document.getElementById('aliadoVinculadorNombre').value,
+                vinculadorTelefono: document.getElementById('aliadoVinculadorTelefono').value,
+                vinculadorCorreo: document.getElementById('aliadoVinculadorCorreo').value,
+                direccion: document.getElementById('aliadoDireccion').value,
+                estado: document.getElementById('aliadoEstado').value,
+                orientadoraId: document.getElementById('aliadoOrientadora').value || null
+            };
+
+            try {
+                const response = await fetch('api/aliados/guardar.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    closeAliadoModal();
+                    loadAliados(currentAliadosPage);
+                    loadAliadosStats();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar el aliado');
+            }
+        });
+    }
+});
+
+// Cargar estadísticas de aliados para el dashboard
+async function loadAliadosStats() {
+    try {
+        // Total de aliados activos
+        const responseActivos = await fetch('api/aliados/activos.php');
+        const resultActivos = await responseActivos.json();
+        
+        if (resultActivos.success) {
+            const totalActivos = resultActivos.data.length;
+            document.getElementById('totalAliadosActivos').textContent = totalActivos;
+        }
+
+        // Total de programas de aliados
+        const responseProgramas = await fetch('api/programas/listar.php?esPropio=false&all=true');
+        const resultProgramas = await responseProgramas.json();
+        
+        if (resultProgramas.success) {
+            const totalProgramas = resultProgramas.pagination.total;
+            document.getElementById('totalProgramasAliados').textContent = totalProgramas;
+        }
+    } catch (error) {
+        console.error('Error al cargar estadísticas de aliados:', error);
+    }
+}
+
+// Helper: Formatear estado de aliado
+function formatEstadoAliado(estado) {
+    if (estado === 'activo') {
+        return '<span class="badge badge-aliado-activo">✅ Activo</span>';
+    } else {
+        return '<span class="badge badge-aliado-inactivo">❌ Inactivo</span>';
+    }
+}
+
+// ========================================
+// GESTIÓN DE PROGRAMAS
+// ========================================
+
+// Variables globales para Programas
+let currentProgramasPage = 1;
+let programasPerPage = 25;
+let programasFilters = { search: '', esPropio: '', aliadoId: '', estado: '' };
+
+// Abrir pantalla de programas
+function openProgramasScreen() {
+    const programasScreen = document.getElementById('programas-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    programasScreen.classList.add('active');
+    infoSection.classList.add('madres-active');
+    showProgramasListView();
+    loadProgramas(1);
+    setupProgramasFilters();
+    loadAliadosForFilter();
+}
+
+// Cerrar pantalla de programas
+function closeProgramasScreen() {
+    const programasScreen = document.getElementById('programas-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    programasScreen.classList.remove('active');
+    infoSection.classList.remove('madres-active');
+}
+
+// Mostrar vista de lista
+function showProgramasListView() {
+    document.getElementById('programas-list-view').classList.add('active');
+    document.getElementById('programas-detail-view').classList.remove('active');
+}
+
+// Mostrar vista de detalle
+function showProgramasDetailView() {
+    document.getElementById('programas-list-view').classList.remove('active');
+    document.getElementById('programas-detail-view').classList.add('active');
+}
+
+// Cargar programas con paginación y filtros
+async function loadProgramas(page = 1) {
+    currentProgramasPage = page;
+    programasPerPage = document.getElementById('programasPerPage')?.value || 25;
+
+    const params = new URLSearchParams({
+        page: currentProgramasPage,
+        per_page: programasPerPage,
+        search: programasFilters.search || '',
+        estado: programasFilters.estado || ''
+    });
+
+    if (programasFilters.esPropio !== '') {
+        params.append('esPropio', programasFilters.esPropio);
+    }
+    if (programasFilters.aliadoId) {
+        params.append('aliadoId', programasFilters.aliadoId);
+    }
+
+    try {
+        const response = await fetch(`api/programas/listar.php?${params}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderProgramasTable(result.data);
+            renderProgramasPagination(result.pagination);
+        } else {
+            console.error('Error al cargar programas:', result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Renderizar tabla de programas
+function renderProgramasTable(programas) {
+    const tbody = document.getElementById('programasTableBody');
+
+    if (!programas || programas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="td-center">No se encontraron programas</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = programas.map(programa => `
+        <tr>
+            <td>${programa.id}</td>
+            <td><strong>${programa.nombre || 'N/A'}</strong></td>
+            <td>${formatTipoPrograma(programa.esPropio)}</td>
+            <td>${programa.aliado ? programa.aliado.nombre : 'N/A'}</td>
+            <td>${programa.responsableNombre || 'N/A'}</td>
+            <td>${formatEstadoPrograma(programa.estado)}</td>
+            <td><span class="badge">${programa.totalMadres || 0}</span></td>
+            <td>
+                <button class="btn-action btn-view" onclick="viewProgramaDetail(${programa.id})" title="Ver detalle">
+                    👁️
+                </button>
+                <button class="btn-action btn-edit" onclick="editarPrograma(${programa.id})" title="Editar">
+                    ✏️
+                </button>
+                <button class="btn-action btn-delete" onclick="eliminarPrograma(${programa.id})" title="Eliminar">
+                    🗑️
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Renderizar paginación
+function renderProgramasPagination(pagination) {
+    const pageCount = document.getElementById('programasPageCount');
+    const pageButtons = document.getElementById('programasPageButtons');
+
+    if (pageCount) {
+        pageCount.textContent = `${pagination.total} registros`;
+    }
+
+    if (pageButtons) {
+        let buttonsHTML = '';
+        
+        // Botón anterior
+        buttonsHTML += `<button class="page-btn" ${currentProgramasPage === 1 ? 'disabled' : ''} 
+                        onclick="loadProgramas(${currentProgramasPage - 1})">←</button>`;
+        
+        // Botones de páginas
+        for (let i = 1; i <= pagination.totalPages; i++) {
+            if (i === 1 || i === pagination.totalPages || (i >= currentProgramasPage - 1 && i <= currentProgramasPage + 1)) {
+                buttonsHTML += `<button class="page-btn ${i === currentProgramasPage ? 'active' : ''}" 
+                                onclick="loadProgramas(${i})">${i}</button>`;
+            } else if (i === currentProgramasPage - 2 || i === currentProgramasPage + 2) {
+                buttonsHTML += '<span class="page-ellipsis">...</span>';
+            }
+        }
+        
+        // Botón siguiente
+        buttonsHTML += `<button class="page-btn" ${currentProgramasPage === pagination.totalPages ? 'disabled' : ''} 
+                        onclick="loadProgramas(${currentProgramasPage + 1})">→</button>`;
+        
+        pageButtons.innerHTML = buttonsHTML;
+    }
+}
+
+// Configurar filtros
+function setupProgramasFilters() {
+    const searchInput = document.getElementById('searchProgramas');
+    const tipoFilter = document.getElementById('filterTipoPrograma');
+    const aliadoFilter = document.getElementById('filterAliadoPrograma');
+    const estadoFilter = document.getElementById('filterEstadoPrograma');
+    const perPageSelect = document.getElementById('programasPerPage');
+
+    if (searchInput && !searchInput.dataset.listenerAttached) {
+        searchInput.addEventListener('input', debounce(function() {
+            programasFilters.search = this.value;
+            loadProgramas(1);
+        }, 500));
+        searchInput.dataset.listenerAttached = 'true';
+    }
+
+    if (tipoFilter && !tipoFilter.dataset.listenerAttached) {
+        tipoFilter.addEventListener('change', function() {
+            programasFilters.esPropio = this.value;
+            loadProgramas(1);
+        });
+        tipoFilter.dataset.listenerAttached = 'true';
+    }
+
+    if (aliadoFilter && !aliadoFilter.dataset.listenerAttached) {
+        aliadoFilter.addEventListener('change', function() {
+            programasFilters.aliadoId = this.value;
+            loadProgramas(1);
+        });
+        aliadoFilter.dataset.listenerAttached = 'true';
+    }
+
+    if (estadoFilter && !estadoFilter.dataset.listenerAttached) {
+        estadoFilter.addEventListener('change', function() {
+            programasFilters.estado = this.value;
+            loadProgramas(1);
+        });
+        estadoFilter.dataset.listenerAttached = 'true';
+    }
+
+    if (perPageSelect && !perPageSelect.dataset.listenerAttached) {
+        perPageSelect.addEventListener('change', function() {
+            loadProgramas(1);
+        });
+        perPageSelect.dataset.listenerAttached = 'true';
+    }
+}
+
+// Limpiar filtros
+function clearProgramasFilters() {
+    programasFilters = { search: '', esPropio: '', aliadoId: '', estado: '' };
+    document.getElementById('searchProgramas').value = '';
+    document.getElementById('filterTipoPrograma').value = '';
+    document.getElementById('filterAliadoPrograma').value = '';
+    document.getElementById('filterEstadoPrograma').value = '';
+    loadProgramas(1);
+}
+
+// Cargar aliados activos para el filtro
+async function loadAliadosForFilter() {
+    try {
+        const response = await fetch('api/aliados/activos.php');
+        const result = await response.json();
+
+        if (result.success) {
+            const select = document.getElementById('filterAliadoPrograma');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Todos los aliados</option>';
+            result.data.forEach(aliado => {
+                select.innerHTML += `<option value="${aliado.id}">${aliado.nombre}</option>`;
+            });
+            select.value = currentValue;
+        }
+    } catch (error) {
+        console.error('Error al cargar aliados:', error);
+    }
+}
+
+// Abrir modal para agregar programa
+function agregarPrograma() {
+    document.getElementById('programaId').value = '';
+    document.getElementById('programaForm').reset();
+    document.getElementById('programaEsPropio').value = 'true';
+    document.getElementById('programaAliadoContainer').style.display = 'none';
+    document.querySelector('#programaModal h2').textContent = '📚 Registrar Programa';
+    openProgramaModal();
+    loadAliadosActivos();
+}
+
+// Editar programa
+async function editarPrograma(id) {
+    try {
+        const response = await fetch(`api/programas/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const programa = result.data;
+            document.getElementById('programaId').value = programa.id;
+            document.getElementById('programaNombre').value = programa.nombre || '';
+            document.getElementById('programaDescripcion').value = programa.descripcion || '';
+            document.getElementById('programaEsPropio').value = programa.esPropio ? 'true' : 'false';
+            document.getElementById('programaResponsableNombre').value = programa.responsableNombre || '';
+            document.getElementById('programaResponsableCargo').value = programa.responsableCargo || '';
+            document.getElementById('programaResponsableTelefono').value = programa.responsableTelefono || '';
+            document.getElementById('programaResponsableCorreo').value = programa.responsableCorreo || '';
+            document.getElementById('programaFechaInicio').value = programa.fechaInicio || '';
+            document.getElementById('programaFechaFin').value = programa.fechaFin || '';
+            document.getElementById('programaEstado').value = programa.estado || 'activo';
+
+            // Mostrar/ocultar selector de aliado
+            if (programa.esPropio) {
+                document.getElementById('programaAliadoContainer').style.display = 'none';
+            } else {
+                document.getElementById('programaAliadoContainer').style.display = 'block';
+                if (programa.aliado && programa.aliado.id) {
+                    document.getElementById('programaAliado').value = programa.aliado.id;
+                }
+            }
+
+            document.querySelector('#programaModal h2').textContent = '📚 Editar Programa';
+            openProgramaModal();
+            loadAliadosActivos();
+        } else {
+            alert('Error al cargar el programa: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar el programa');
+    }
+}
+
+// Eliminar programa
+async function eliminarPrograma(id) {
+    if (!confirm('¿Está seguro de eliminar este programa? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('api/programas/eliminar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Programa eliminado exitosamente');
+            loadProgramas(currentProgramasPage);
+            loadProgramasStats();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el programa');
+    }
+}
+
+// Ver detalle de programa
+async function viewProgramaDetail(id) {
+    try {
+        const response = await fetch(`api/programas/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderProgramaDetail(result.data);
+            showProgramasDetailView();
+        } else {
+            alert('Error al cargar el detalle: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar el detalle');
+    }
+}
+
+// Renderizar detalle del programa
+function renderProgramaDetail(programa) {
+    const detailContent = document.getElementById('programaDetailContent');
+    
+    detailContent.innerHTML = `
+        <div class="detail-section">
+            <h3>Información General</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>ID:</label>
+                    <span>${programa.id}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span><strong>${programa.nombre || 'N/A'}</strong></span>
+                </div>
+                <div class="detail-item">
+                    <label>Tipo:</label>
+                    <span>${formatTipoPrograma(programa.esPropio)}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Estado:</label>
+                    <span>${formatEstadoPrograma(programa.estado)}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Descripción:</label>
+                    <span>${programa.descripcion || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        ${programa.aliado ? `
+        <div class="detail-section">
+            <h3>Aliado</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span><strong>${programa.aliado.nombre}</strong></span>
+                </div>
+                <div class="detail-item">
+                    <label>Contacto:</label>
+                    <span>${programa.aliado.contactoNombre || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
+        <div class="detail-section">
+            <h3>Responsable del Programa</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span>${programa.responsableNombre || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Cargo:</label>
+                    <span>${programa.responsableCargo || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Teléfono:</label>
+                    <span>${programa.responsableTelefono || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Correo:</label>
+                    <span>${programa.responsableCorreo || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Fechas</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Fecha Inicio:</label>
+                    <span>${programa.fechaInicio || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha Fin:</label>
+                    <span>${programa.fechaFin || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha de Registro:</label>
+                    <span>${formatDateTime(programa.createdAt)}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Última Actualización:</label>
+                    <span>${formatDateTime(programa.updatedAt)}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Madres Inscritas</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Total:</label>
+                    <span class="badge">${programa.totalMadres || 0}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            <button class="btn-action btn-edit" onclick="editarPrograma(${programa.id})">
+                ✏️ Editar
+            </button>
+            <button class="btn-action btn-delete" onclick="eliminarPrograma(${programa.id})">
+                🗑️ Eliminar
+            </button>
+        </div>
+    `;
+}
+
+// Abrir modal
+function openProgramaModal() {
+    document.getElementById('programaModal').classList.add('active');
+}
+
+// Cerrar modal
+function closeProgramaModal() {
+    document.getElementById('programaModal').classList.remove('active');
+}
+
+// Toggle selector de aliado según tipo
+function toggleAliadoSelector() {
+    const esPropio = document.getElementById('programaEsPropio').value === 'true';
+    const aliadoContainer = document.getElementById('programaAliadoContainer');
+    
+    if (esPropio) {
+        aliadoContainer.style.display = 'none';
+        document.getElementById('programaAliado').value = '';
+    } else {
+        aliadoContainer.style.display = 'block';
+    }
+}
+
+// Cargar aliados activos para selector
+async function loadAliadosActivos() {
+    try {
+        const response = await fetch('api/aliados/activos.php');
+        const result = await response.json();
+
+        if (result.success) {
+            const select = document.getElementById('programaAliado');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Seleccione...</option>';
+            result.data.forEach(aliado => {
+                select.innerHTML += `<option value="${aliado.id}">${aliado.nombre}</option>`;
+            });
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar aliados:', error);
+    }
+}
+
+// Manejar envío del formulario de programa
+document.addEventListener('DOMContentLoaded', function () {
+    const programaForm = document.getElementById('programaForm');
+    if (programaForm) {
+        programaForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const esPropio = document.getElementById('programaEsPropio').value === 'true';
+            const aliadoId = document.getElementById('programaAliado').value;
+
+            // Validación
+            if (!esPropio && !aliadoId) {
+                alert('Debe seleccionar un aliado para programas externos');
+                return;
+            }
+
+            const formData = {
+                id: document.getElementById('programaId').value || null,
+                nombre: document.getElementById('programaNombre').value,
+                descripcion: document.getElementById('programaDescripcion').value,
+                esPropio: esPropio,
+                aliadoId: esPropio ? null : (aliadoId || null),
+                responsableNombre: document.getElementById('programaResponsableNombre').value,
+                responsableCargo: document.getElementById('programaResponsableCargo').value,
+                responsableTelefono: document.getElementById('programaResponsableTelefono').value,
+                responsableCorreo: document.getElementById('programaResponsableCorreo').value,
+                fechaInicio: document.getElementById('programaFechaInicio').value || null,
+                fechaFin: document.getElementById('programaFechaFin').value || null,
+                estado: document.getElementById('programaEstado').value
+            };
+
+            try {
+                const response = await fetch('api/programas/guardar.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    closeProgramaModal();
+                    loadProgramas(currentProgramasPage);
+                    loadProgramasStats();
+                    loadAliadosStats();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar el programa');
+            }
+        });
+    }
+});
+
+// Cargar estadísticas de programas para el dashboard
+async function loadProgramasStats() {
+    try {
+        // Total de programas activos
+        const responseProgramas = await fetch('api/programas/activos.php');
+        const resultProgramas = await responseProgramas.json();
+        
+        if (resultProgramas.success) {
+            const totalProgramas = resultProgramas.data.length;
+            document.getElementById('totalProgramasActivos').textContent = totalProgramas;
+        }
+
+        // Total de madres en programas
+        const responseMadres = await fetch('api/madres_programas/listar.php?all=true');
+        const resultMadres = await responseMadres.json();
+        
+        if (resultMadres.success) {
+            const totalMadres = resultMadres.pagination.total;
+            document.getElementById('totalMadresEnProgramas').textContent = totalMadres;
+        }
+    } catch (error) {
+        console.error('Error al cargar estadísticas de programas:', error);
+    }
+}
+
+// Helper: Formatear tipo de programa
+function formatTipoPrograma(esPropio) {
+    if (esPropio) {
+        return '<span class="badge badge-programa-propio">🏢 Propio</span>';
+    } else {
+        return '<span class="badge badge-programa-aliado">🤝 Aliado</span>';
+    }
+}
+
+// Helper: Formatear estado de programa
+function formatEstadoPrograma(estado) {
+    const badges = {
+        'activo': '<span class="badge badge-programa-activo">✅ Activo</span>',
+        'inactivo': '<span class="badge badge-programa-inactivo">❌ Inactivo</span>',
+        'finalizado': '<span class="badge badge-programa-finalizado">🏁 Finalizado</span>'
+    };
+    return badges[estado] || estado;
 }

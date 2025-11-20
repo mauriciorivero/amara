@@ -24,7 +24,7 @@
                 <a href="#blog">Aliados</a>
                 <a href="#blog">Embarazos</a>
             </nav>
-            <a href="#" class="download-btn">DOWNLOAD APP</a>
+            <a href="#" class="download-btn">Registro de cambios</a>
         </header>
 
         <section class="info-section">
@@ -494,10 +494,15 @@
                         <div class="card-title">Nuestros</div>
                         <div class="card-main-title">Aliados</div>
                     </div>
-                    <div class="arrow-icon" onclick="openAliadosModal()">↗</div>
+                    <div class="arrow-icon" onclick="openAliadosScreen()">↗</div>
                 </div>
                 <div class="stat-item">
-                    <!-- Contenido próximamente -->
+                    <div class="stat-icon">🤝</div>
+                    <div class="stat-text"><span id="totalAliadosActivos">0</span> Activos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-text"><span id="totalProgramasAliados">0</span> Programas</div>
                 </div>
             </div>
 
@@ -508,6 +513,24 @@
                 </div>
                 <div class="activities-grid">
                     <!-- Contenido próximamente -->
+                </div>
+            </div>
+
+            <div class="info-card programas" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title" style="color: #ddd;">Nuestros</div>
+                        <div class="card-main-title" style="color: white;">Programas</div>
+                    </div>
+                    <div class="arrow-icon" onclick="openProgramasScreen()">↗</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-text"><span id="totalProgramasActivos">0</span> Activos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-text"><span id="totalMadresEnProgramas">0</span> Madres</div>
                 </div>
             </div>
 
@@ -731,6 +754,242 @@
 
                     <div class="detail-content" id="ayudaDetailContent" style="padding: 30px;">
                         <p class="no-data" style="text-align: center; color: #6b7280;">Seleccione una ayuda para ver sus detalles</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de Aliados -->
+            <div class="module-screen" id="aliados-screen">
+                <!-- Vista de Lista -->
+                <div class="aliados-view active" id="aliados-list-view">
+                    <div class="madres-header" style="padding: 20px 30px; margin: 0;">
+                        <h2 class="madres-title">🤝 Gestión de Aliados</h2>
+                        <div class="madres-header-buttons">
+                            <button class="btn-add-primary" onclick="agregarAliado()">
+                                <span class="btn-icon">+</span>
+                                Nuevo Aliado
+                            </button>
+                            <button class="btn-close-madres" onclick="closeAliadosScreen()">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar Módulo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <input type="text" id="searchAliados" class="filter-input search-input" 
+                                   placeholder="🔍 Buscar aliado...">
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Estado</label>
+                                <select id="filterEstadoAliado" class="filter-select">
+                                    <option value="">Todos los estados</option>
+                                    <option value="activo">Activos</option>
+                                    <option value="inactivo">Inactivos</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-filter-clear" onclick="clearAliadosFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-wrapper">
+                        <table class="madres-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Persona Contacto</th>
+                                    <th>Teléfono</th>
+                                    <th>Correo</th>
+                                    <th>Estado</th>
+                                    <th>Programas</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aliadosTableBody">
+                                <tr>
+                                    <td colspan="8" class="td-center">Cargando aliados...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination-modern">
+                        <div class="pagination-info">
+                            Mostrando <span class="per-page-select">
+                                <select id="aliadosPerPage">
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </span> por página
+                        </div>
+                        <div class="pagination-controls">
+                            <span class="page-count" id="aliadosPageCount">0 registros</span>
+                            <div class="page-buttons" id="aliadosPageButtons">
+                                <button class="page-btn" disabled>←</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn" disabled>→</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalle -->
+                <div class="aliados-view" id="aliados-detail-view">
+                    <div class="detail-header" style="padding: 20px 30px; margin: 0; background: white; border-bottom: 1px solid #e5e7eb;">
+                        <button class="btn-back" onclick="showAliadosListView()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
+                            </svg>
+                            Volver al listado
+                        </button>
+                        <h2 class="detail-title" style="color: #1f2937; margin: 0;">Detalle de Aliado</h2>
+                        <button class="btn-close-madres" onclick="closeAliadosScreen()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cerrar
+                        </button>
+                    </div>
+
+                    <div class="detail-content" id="aliadoDetailContent" style="padding: 30px;">
+                        <p class="no-data" style="text-align: center; color: #6b7280;">Seleccione un aliado para ver sus detalles</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de Programas -->
+            <div class="module-screen" id="programas-screen">
+                <!-- Vista de Lista -->
+                <div class="programas-view active" id="programas-list-view">
+                    <div class="madres-header" style="padding: 20px 30px; margin: 0;">
+                        <h2 class="madres-title">📚 Gestión de Programas</h2>
+                        <div class="madres-header-buttons">
+                            <button class="btn-add-primary" onclick="agregarPrograma()">
+                                <span class="btn-icon">+</span>
+                                Nuevo Programa
+                            </button>
+                            <button class="btn-close-madres" onclick="closeProgramasScreen()">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar Módulo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <input type="text" id="searchProgramas" class="filter-input search-input" 
+                                   placeholder="🔍 Buscar programa...">
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Tipo</label>
+                                <select id="filterTipoPrograma" class="filter-select">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="true">Propios de la Corporación</option>
+                                    <option value="false">De Aliados</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Aliado</label>
+                                <select id="filterAliadoPrograma" class="filter-select">
+                                    <option value="">Todos los aliados</option>
+                                    <!-- Se llenará dinámicamente -->
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Estado</label>
+                                <select id="filterEstadoPrograma" class="filter-select">
+                                    <option value="">Todos los estados</option>
+                                    <option value="activo">Activos</option>
+                                    <option value="inactivo">Inactivos</option>
+                                    <option value="finalizado">Finalizados</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-filter-clear" onclick="clearProgramasFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-wrapper">
+                        <table class="madres-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Aliado</th>
+                                    <th>Responsable</th>
+                                    <th>Estado</th>
+                                    <th>Madres Inscritas</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programasTableBody">
+                                <tr>
+                                    <td colspan="8" class="td-center">Cargando programas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination-modern">
+                        <div class="pagination-info">
+                            Mostrando <span class="per-page-select">
+                                <select id="programasPerPage">
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </span> por página
+                        </div>
+                        <div class="pagination-controls">
+                            <span class="page-count" id="programasPageCount">0 registros</span>
+                            <div class="page-buttons" id="programasPageButtons">
+                                <button class="page-btn" disabled>←</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn" disabled>→</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalle -->
+                <div class="programas-view" id="programas-detail-view">
+                    <div class="detail-header" style="padding: 20px 30px; margin: 0; background: white; border-bottom: 1px solid #e5e7eb;">
+                        <button class="btn-back" onclick="showProgramasListView()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
+                            </svg>
+                            Volver al listado
+                        </button>
+                        <h2 class="detail-title" style="color: #1f2937; margin: 0;">Detalle de Programa</h2>
+                        <button class="btn-close-madres" onclick="closeProgramasScreen()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cerrar
+                        </button>
+                    </div>
+
+                    <div class="detail-content" id="programaDetailContent" style="padding: 30px;">
+                        <p class="no-data" style="text-align: center; color: #6b7280;">Seleccione un programa para ver sus detalles</p>
                     </div>
                 </div>
             </div>
@@ -1080,6 +1339,300 @@
                     <button type="submit" class="btn-save-modal">
                         <span>💾</span>
                         Guardar Ayuda
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Registro/Edición de Aliado -->
+    <div class="modal" id="aliadoModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeAliadoModal()">×</button>
+            <h2>🤝 Registrar Aliado</h2>
+            <p class="modal-subtitle">Complete la información del aliado</p>
+
+            <form id="aliadoForm" class="embarazo-form">
+                <input type="hidden" id="aliadoId" name="id">
+
+                <!-- Nombre (full-width) -->
+                <div class="form-group-embarazo full-width">
+                    <label for="aliadoNombre">
+                        <span class="label-icon">🏢</span>
+                        Nombre del Aliado
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" id="aliadoNombre" name="nombre" required class="form-input-embarazo" 
+                           placeholder="Nombre del aliado...">
+                </div>
+
+                <!-- Descripción (full-width) -->
+                <div class="form-group-embarazo full-width">
+                    <label for="aliadoDescripcion">
+                        <span class="label-icon">📝</span>
+                        Descripción
+                    </label>
+                    <textarea id="aliadoDescripcion" name="descripcion" rows="3" 
+                              class="form-input-embarazo" placeholder="Descripción del aliado..."></textarea>
+                </div>
+
+                <!-- Persona de Contacto Externo -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoContactoNombre">
+                        <span class="label-icon">👤</span>
+                        Persona de Contacto
+                    </label>
+                    <input type="text" id="aliadoContactoNombre" name="contactoNombre" 
+                           class="form-input-embarazo" placeholder="Nombre del contacto...">
+                </div>
+
+                <!-- Cargo -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoContactoCargo">
+                        <span class="label-icon">💼</span>
+                        Cargo
+                    </label>
+                    <input type="text" id="aliadoContactoCargo" name="contactoCargo" 
+                           class="form-input-embarazo" placeholder="Cargo del contacto...">
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoContactoTelefono">
+                        <span class="label-icon">📞</span>
+                        Teléfono
+                    </label>
+                    <input type="tel" id="aliadoContactoTelefono" name="contactoTelefono" 
+                           class="form-input-embarazo" placeholder="Teléfono de contacto...">
+                </div>
+
+                <!-- Correo -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoContactoCorreo">
+                        <span class="label-icon">📧</span>
+                        Correo Electrónico
+                    </label>
+                    <input type="email" id="aliadoContactoCorreo" name="contactoCorreo" 
+                           class="form-input-embarazo" placeholder="correo@ejemplo.com">
+                </div>
+
+                <!-- Vinculador Nombre -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoVinculadorNombre">
+                        <span class="label-icon">🔗</span>
+                        Vinculador (Nombre)
+                    </label>
+                    <input type="text" id="aliadoVinculadorNombre" name="vinculadorNombre" 
+                           class="form-input-embarazo" placeholder="Quien vinculó al aliado...">
+                </div>
+
+                <!-- Vinculador Teléfono -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoVinculadorTelefono">
+                        <span class="label-icon">📱</span>
+                        Vinculador (Teléfono)
+                    </label>
+                    <input type="tel" id="aliadoVinculadorTelefono" name="vinculadorTelefono" 
+                           class="form-input-embarazo" placeholder="Teléfono del vinculador...">
+                </div>
+
+                <!-- Vinculador Correo -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoVinculadorCorreo">
+                        <span class="label-icon">✉️</span>
+                        Vinculador (Correo)
+                    </label>
+                    <input type="email" id="aliadoVinculadorCorreo" name="vinculadorCorreo" 
+                           class="form-input-embarazo" placeholder="correo@vinculador.com">
+                </div>
+
+                <!-- Orientadora -->
+                <div class="form-group-embarazo">
+                    <label for="aliadoOrientadora">
+                        <span class="label-icon">👩‍💼</span>
+                        Orientadora
+                    </label>
+                    <select id="aliadoOrientadora" name="orientadoraId" class="form-input-embarazo">
+                        <option value="">Seleccione...</option>
+                        <!-- Se llenará dinámicamente -->
+                    </select>
+                </div>
+
+                <!-- Dirección (full-width) -->
+                <div class="form-group-embarazo full-width">
+                    <label for="aliadoDireccion">
+                        <span class="label-icon">📍</span>
+                        Dirección
+                    </label>
+                    <textarea id="aliadoDireccion" name="direccion" rows="2" 
+                              class="form-input-embarazo" placeholder="Dirección del aliado..."></textarea>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group-embarazo full-width">
+                    <label for="aliadoEstado">
+                        <span class="label-icon">✅</span>
+                        Estado
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="aliadoEstado" name="estado" required class="form-input-embarazo">
+                        <option value="activo">✅ Activo</option>
+                        <option value="inactivo">❌ Inactivo</option>
+                    </select>
+                </div>
+
+                <!-- Botones -->
+                <div class="modal-actions full-width">
+                    <button type="button" class="btn-cancel-modal" onclick="closeAliadoModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-save-modal">
+                        <span>💾</span>
+                        Guardar Aliado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Registro/Edición de Programa -->
+    <div class="modal" id="programaModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeProgramaModal()">×</button>
+            <h2>📚 Registrar Programa</h2>
+            <p class="modal-subtitle">Complete la información del programa</p>
+
+            <form id="programaForm" class="embarazo-form">
+                <input type="hidden" id="programaId" name="id">
+
+                <!-- Nombre (full-width) -->
+                <div class="form-group-embarazo full-width">
+                    <label for="programaNombre">
+                        <span class="label-icon">📚</span>
+                        Nombre del Programa
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" id="programaNombre" name="nombre" required class="form-input-embarazo" 
+                           placeholder="Nombre del programa...">
+                </div>
+
+                <!-- Descripción (full-width) -->
+                <div class="form-group-embarazo full-width">
+                    <label for="programaDescripcion">
+                        <span class="label-icon">📝</span>
+                        Descripción
+                    </label>
+                    <textarea id="programaDescripcion" name="descripcion" rows="3" 
+                              class="form-input-embarazo" placeholder="Descripción del programa..."></textarea>
+                </div>
+
+                <!-- Tipo -->
+                <div class="form-group-embarazo">
+                    <label for="programaEsPropio">
+                        <span class="label-icon">🏢</span>
+                        Tipo de Programa
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="programaEsPropio" name="esPropio" required class="form-input-embarazo" onchange="toggleAliadoSelector()">
+                        <option value="true">🏢 Propio de la Corporación</option>
+                        <option value="false">🤝 De Aliado</option>
+                    </select>
+                </div>
+
+                <!-- Aliado (condicional) -->
+                <div class="form-group-embarazo" id="programaAliadoContainer" style="display: none;">
+                    <label for="programaAliado">
+                        <span class="label-icon">🤝</span>
+                        Aliado
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="programaAliado" name="aliadoId" class="form-input-embarazo">
+                        <option value="">Seleccione...</option>
+                        <!-- Se llenará dinámicamente -->
+                    </select>
+                </div>
+
+                <!-- Responsable Nombre -->
+                <div class="form-group-embarazo">
+                    <label for="programaResponsableNombre">
+                        <span class="label-icon">👤</span>
+                        Responsable
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" id="programaResponsableNombre" name="responsableNombre" required 
+                           class="form-input-embarazo" placeholder="Nombre del responsable...">
+                </div>
+
+                <!-- Responsable Cargo -->
+                <div class="form-group-embarazo">
+                    <label for="programaResponsableCargo">
+                        <span class="label-icon">💼</span>
+                        Cargo
+                    </label>
+                    <input type="text" id="programaResponsableCargo" name="responsableCargo" 
+                           class="form-input-embarazo" placeholder="Cargo del responsable...">
+                </div>
+
+                <!-- Responsable Teléfono -->
+                <div class="form-group-embarazo">
+                    <label for="programaResponsableTelefono">
+                        <span class="label-icon">📞</span>
+                        Teléfono
+                    </label>
+                    <input type="tel" id="programaResponsableTelefono" name="responsableTelefono" 
+                           class="form-input-embarazo" placeholder="Teléfono del responsable...">
+                </div>
+
+                <!-- Responsable Correo -->
+                <div class="form-group-embarazo">
+                    <label for="programaResponsableCorreo">
+                        <span class="label-icon">📧</span>
+                        Correo
+                    </label>
+                    <input type="email" id="programaResponsableCorreo" name="responsableCorreo" 
+                           class="form-input-embarazo" placeholder="correo@ejemplo.com">
+                </div>
+
+                <!-- Fecha Inicio -->
+                <div class="form-group-embarazo">
+                    <label for="programaFechaInicio">
+                        <span class="label-icon">📅</span>
+                        Fecha Inicio
+                    </label>
+                    <input type="date" id="programaFechaInicio" name="fechaInicio" class="form-input-embarazo">
+                </div>
+
+                <!-- Fecha Fin -->
+                <div class="form-group-embarazo">
+                    <label for="programaFechaFin">
+                        <span class="label-icon">📅</span>
+                        Fecha Fin
+                    </label>
+                    <input type="date" id="programaFechaFin" name="fechaFin" class="form-input-embarazo">
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group-embarazo full-width">
+                    <label for="programaEstado">
+                        <span class="label-icon">✅</span>
+                        Estado
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="programaEstado" name="estado" required class="form-input-embarazo">
+                        <option value="activo">✅ Activo</option>
+                        <option value="inactivo">❌ Inactivo</option>
+                        <option value="finalizado">🏁 Finalizado</option>
+                    </select>
+                </div>
+
+                <!-- Botones -->
+                <div class="modal-actions full-width">
+                    <button type="button" class="btn-cancel-modal" onclick="closeProgramaModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-save-modal">
+                        <span>💾</span>
+                        Guardar Programa
                     </button>
                 </div>
             </form>

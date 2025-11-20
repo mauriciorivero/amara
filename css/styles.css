@@ -243,6 +243,10 @@ nav a:hover {
     background: var(--color-bg-white);
 }
 
+.info-card.programas {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
 .info-card.tracking {
     background: var(--color-secondary-purple-light);
 }
@@ -2708,6 +2712,42 @@ nav a:hover {
     display: flex;
 }
 
+/* ========================================
+   MÓDULO DE ALIADOS
+   ======================================== */
+
+.aliados-view {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow-y: auto;
+    background: #f5f7fa;
+}
+
+.aliados-view.active {
+    display: flex;
+}
+
+/* ========================================
+   MÓDULO DE PROGRAMAS
+   ======================================== */
+
+.programas-view {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow-y: auto;
+    background: #f5f7fa;
+}
+
+.programas-view.active {
+    display: flex;
+}
+
 /* Elementos con padding */
 .ayudas-view .filters-container,
 .ayudas-view .table-wrapper,
@@ -3024,5 +3064,69 @@ nav a:hover {
     .madres-table-modern td {
         padding: 10px 8px;
     }
+}
+
+/* ========================================
+   BADGES PARA ALIADOS Y PROGRAMAS
+   ======================================== */
+
+/* Badges generales */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Badges de estado para Aliados */
+.badge-aliado-activo {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.badge-aliado-inactivo {
+    background: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+    border: 1px solid #6b7280;
+}
+
+/* Badges de estado para Programas */
+.badge-programa-activo {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.badge-programa-inactivo {
+    background: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+    border: 1px solid #6b7280;
+}
+
+.badge-programa-finalizado {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+/* Badges de tipo para Programas */
+.badge-programa-propio {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+    border: 1px solid #8b5cf6;
+}
+
+.badge-programa-aliado {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+    border: 1px solid #06b6d4;
+}
+
+/* Modales de aliados y programas deben aparecer sobre las vistas */
+#aliadoModal,
+#programaModal {
+    z-index: 10000;
 }
 
