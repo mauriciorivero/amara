@@ -23,3 +23,8 @@ Thumbs.db
 .env
 config/env.php
 
+# Planes de implementación y documentación temporal
+*.md
+# Permitir solo README
+!README.md
+
