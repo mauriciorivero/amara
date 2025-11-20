@@ -340,4 +340,15 @@ class MadreDAO
 
         return $madre;
     }
+
+    public function getStats()
+    {
+        $sql = "SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN desvinculo IS NULL OR desvinculo = '' THEN 1 ELSE 0 END) as activas,
+                    SUM(CASE WHEN desvinculo IS NOT NULL AND desvinculo != '' THEN 1 ELSE 0 END) as inactivas
+                FROM madres";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

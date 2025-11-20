@@ -956,8 +956,6 @@ async function editMadre(madreId) {
             form.segundoApellido.value = madre.segundoApellido || '';
             form.tipoDocumento.value = madre.tipoDocumento || 'CC';
             form.numeroDocumento.value = madre.numeroDocumento || '';
-            form.fechaNacimiento.value = madre.fechaNacimiento || '';
-            form.edad.value = madre.edad || '';
             form.numeroTelefono.value = madre.numeroTelefono || '';
             form.otroContacto.value = madre.otroContacto || '';
             form.esVirtual.value = madre.esVirtual ? '1' : '0';
@@ -1171,4 +1169,50 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+});
+
+// Funciones para módulos en desarrollo
+function openOrientadorasModal() {
+    alert('Módulo de Orientadoras en desarrollo');
+}
+
+function openEmbarazosBebesModal() {
+    alert('Módulo de Embarazos y Bebés en desarrollo');
+}
+
+function openAliadosModal() {
+    alert('Módulo de Aliados en desarrollo');
+}
+
+function openAyudasModal() {
+    alert('Módulo de Ayudas en desarrollo');
+}
+
+function openReportesModal() {
+    alert('Módulo de Reportes en desarrollo');
+}
+
+// Cargar estadísticas del dashboard
+async function loadDashboardStats() {
+    // Solo si estamos en el dashboard (existen los elementos)
+    const totalMadres = document.getElementById('totalMadres');
+    if (!totalMadres) return;
+
+    try {
+        const response = await fetch('api/madres/estadisticas.php');
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('totalMadres').textContent = result.data.total;
+            document.getElementById('totalMadresActivas').textContent = result.data.activas;
+            document.getElementById('totalMadresInactivas').textContent = result.data.inactivas;
+        }
+    } catch (error) {
+        console.error('Error cargando estadísticas:', error);
+    }
+}
+
+// Inicializar dashboard
+document.addEventListener('DOMContentLoaded', function () {
+    loadDashboardStats();
 });

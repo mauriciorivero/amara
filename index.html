@@ -448,33 +448,25 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-icon">👥</div>
-                    <div class="stat-text">450K+ Active Students</div>
+                    <div class="stat-text"><span id="totalMadres">0</span> Total Madres</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-icon">▶</div>
-                    <div class="stat-text">3500+ Hour of Fitness Content</div>
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-text"><span id="totalMadresActivas">0</span> Activas</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-icon">👤</div>
-                    <div class="stat-text">200+ Fitness Coaches</div>
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-text"><span id="totalMadresInactivas">0</span> Inactivas</div>
                 </div>
             </div>
 
             <div class="info-card activities" data-card>
                 <div class="card-header">
                     <div class="card-main-title" style="font-size: 28px;">Orientadoras</div>
-                    <div class="arrow-icon">↗</div>
+                    <div class="arrow-icon" onclick="openOrientadorasModal()">↗</div>
                 </div>
                 <div class="activities-grid">
-                    <div class="activity-tag">JOGGING</div>
-                    <div class="activity-tag">ZUMBA</div>
-                    <div class="activity-tag">AEROBICS</div>
-                    <div class="activity-tag">GYM</div>
-                    <div class="activity-tag">YOGA</div>
-                    <div class="activity-tag active">⭐</div>
-                    <div class="activity-tag">CYCLING</div>
-                    <div class="activity-tag">SWIMMING</div>
-                    <div class="activity-tag">STRETCHING</div>
+                    <!-- Contenido próximamente -->
                 </div>
             </div>
 
@@ -484,37 +476,10 @@
 
                         <div class="card-main-title" style="color: white;">Embarazos y Bebés</div>
                     </div>
-                    <div class="arrow-icon">↗</div>
-                </div>
-                <div class="legend">
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: #c8ff00;"></span>
-                        Physical Health
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: white;"></span>
-                        Mental Health
-                    </div>
+                    <div class="arrow-icon" onclick="openEmbarazosBebesModal()">↗</div>
                 </div>
                 <div class="chart">
-                    <svg width="100%" height="150" style="position: absolute; bottom: 0;">
-                        <polyline points="0,120 50,100 100,110 150,80 200,90 250,60 300,70" fill="none" stroke="#c8ff00"
-                            stroke-width="3" />
-                        <polyline points="0,130 50,110 100,100 150,90 200,85 250,70 300,60" fill="none" stroke="white"
-                            stroke-width="3" />
-                        <circle cx="300" cy="70" r="5" fill="#c8ff00" />
-                        <circle cx="300" cy="60" r="5" fill="white" />
-                    </svg>
-                    <div
-                        style="position: absolute; bottom: 0; display: flex; justify-content: space-between; width: 100%; color: #ddd; font-size: 12px; padding: 0 10px;">
-                        <span>Mon</span>
-                        <span>Tue</span>
-                        <span>Wed</span>
-                        <span>Thu</span>
-                        <span
-                            style="background: white; color: #a855f7; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Fri</span>
-                        <span>Sat</span>
-                    </div>
+                    <!-- Contenido próximamente -->
                 </div>
             </div>
 
@@ -524,77 +489,33 @@
                         <div class="card-title">Nuestros</div>
                         <div class="card-main-title">Aliados</div>
                     </div>
-                    <div class="arrow-icon" onclick="openModal()">↗</div>
+                    <div class="arrow-icon" onclick="openAliadosModal()">↗</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-text">450K+ Active Students</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-icon">▶</div>
-                    <div class="stat-text">3500+ Hour of Fitness Content</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-icon">👤</div>
-                    <div class="stat-text">200+ Fitness Coaches</div>
+                    <!-- Contenido próximamente -->
                 </div>
             </div>
 
             <div class="info-card activities" data-card>
                 <div class="card-header">
                     <div class="card-main-title" style="font-size: 28px;">Reportes</div>
-                    <div class="arrow-icon">↗</div>
+                    <div class="arrow-icon" onclick="openReportesModal()">↗</div>
                 </div>
                 <div class="activities-grid">
-                    <div class="activity-tag">JOGGING</div>
-                    <div class="activity-tag">ZUMBA</div>
-                    <div class="activity-tag">AEROBICS</div>
-                    <div class="activity-tag">GYM</div>
-                    <div class="activity-tag">YOGA</div>
-                    <div class="activity-tag active">⭐</div>
-                    <div class="activity-tag">CYCLING</div>
-                    <div class="activity-tag">SWIMMING</div>
-                    <div class="activity-tag">STRETCHING</div>
+                    <!-- Contenido próximamente -->
                 </div>
             </div>
 
             <div class="info-card tracking" data-card>
                 <div class="card-header">
                     <div>
-                        <div class="card-title" style="color: #ddd;">Proximos</div>
-                        <div class="card-main-title" style="color: white;">Embarazos</div>
+                        <div class="card-title" style="color: #ddd;">Nuestras</div>
+                        <div class="card-main-title" style="color: white;">Ayudas</div>
                     </div>
-                    <div class="arrow-icon">↗</div>
-                </div>
-                <div class="legend">
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: #c8ff00;"></span>
-                        Physical Health
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: white;"></span>
-                        Mental Health
-                    </div>
+                    <div class="arrow-icon" onclick="openAyudasModal()">↗</div>
                 </div>
                 <div class="chart">
-                    <svg width="100%" height="150" style="position: absolute; bottom: 0;">
-                        <polyline points="0,120 50,100 100,110 150,80 200,90 250,60 300,70" fill="none" stroke="#c8ff00"
-                            stroke-width="3" />
-                        <polyline points="0,130 50,110 100,100 150,90 200,85 250,70 300,60" fill="none" stroke="white"
-                            stroke-width="3" />
-                        <circle cx="300" cy="70" r="5" fill="#c8ff00" />
-                        <circle cx="300" cy="60" r="5" fill="white" />
-                    </svg>
-                    <div
-                        style="position: absolute; bottom: 0; display: flex; justify-content: space-between; width: 100%; color: #ddd; font-size: 12px; padding: 0 10px;">
-                        <span>Mon</span>
-                        <span>Tue</span>
-                        <span>Wed</span>
-                        <span>Thu</span>
-                        <span
-                            style="background: white; color: #a855f7; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Fri</span>
-                        <span>Sat</span>
-                    </div>
+                    <!-- Contenido próximamente -->
                 </div>
             </div>
         </section>
