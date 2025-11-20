@@ -435,6 +435,8 @@
                 </div>
             </div>
 
+
+
             <!-- Tarjetas de información (Visibles por defecto) -->
             <div class="info-card community" data-card>
                 <div class="card-header">
@@ -479,8 +481,8 @@
             <div class="info-card tracking" data-card>
                 <div class="card-header">
                     <div>
-                        <div class="card-title" style="color: #ddd;">Proximos</div>
-                        <div class="card-main-title" style="color: white;">Embarazos</div>
+
+                        <div class="card-main-title" style="color: white;">Embarazos y Bebés</div>
                     </div>
                     <div class="arrow-icon">↗</div>
                 </div>
@@ -540,7 +542,7 @@
 
             <div class="info-card activities" data-card>
                 <div class="card-header">
-                    <div class="card-main-title" style="font-size: 28px;">Orientadoras</div>
+                    <div class="card-main-title" style="font-size: 28px;">Reportes</div>
                     <div class="arrow-icon">↗</div>
                 </div>
                 <div class="activities-grid">
@@ -608,6 +610,179 @@
             <input type="email" class="modal-input" placeholder="Correo electrónico">
             <input type="tel" class="modal-input" placeholder="Teléfono">
             <button class="modal-submit">Comenzar Ahora</button>
+        </div>
+    </div>
+
+    <!-- Modal de Registro de Embarazo -->
+    <div class="modal" id="embarazoModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeEmbarazoModal()">×</button>
+            <h2>🤰 Registrar Nuevo Embarazo</h2>
+            <p class="modal-subtitle">Complete la información del embarazo en curso</p>
+
+            <form id="embarazoForm" class="embarazo-form">
+                <input type="hidden" id="embarazoMadreId" name="madreId">
+
+                <div class="form-group-embarazo">
+                    <label for="totalBebesPorNacer">
+                        <span class="label-icon">🤰</span>
+                        ¿Cuántos bebés espera?
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="number" id="totalBebesPorNacer" name="totalBebesPorNacer" min="1" max="5" value="1"
+                        required class="form-input-embarazo">
+                    <small class="form-hint">Número de bebés esperados en este embarazo</small>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="esMultiple" name="esMultiple" class="form-checkbox-embarazo">
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">
+                            <span class="label-icon">👥</span>
+                            Embarazo múltiple (mellizos, trillizos, etc.)
+                        </span>
+                    </label>
+                    <small class="form-hint">Marque si espera más de un bebé</small>
+                </div>
+
+                <div class="form-group-embarazo form-group-optional">
+                    <button type="button" class="btn-toggle-optional" onclick="toggleOptionalFields()">
+                        <span id="toggleIcon">▶</span>
+                        Campos adicionales (opcional)
+                    </button>
+
+                    <div id="optionalFields" class="optional-fields" style="display: none;">
+                        <div class="form-group-embarazo">
+                            <label for="totalBebesNacidos">
+                                👶 Bebés ya nacidos
+                            </label>
+                            <input type="number" id="totalBebesNacidos" name="totalBebesNacidos" min="0" max="5"
+                                value="0" class="form-input-embarazo">
+                            <small class="form-hint">Si algún bebé ya nació de este embarazo</small>
+                        </div>
+
+                        <div class="form-group-embarazo">
+                            <label for="bebesNoNacidos">
+                                ⚠️ Bebés no nacidos
+                            </label>
+                            <input type="number" id="bebesNoNacidos" name="bebesNoNacidos" min="0" max="5" value="0"
+                                class="form-input-embarazo">
+                            <small class="form-hint">Abortos o muerte gestacional</small>
+                        </div>
+
+                        <div class="form-group-embarazo">
+                            <label for="bebesFallecidos">
+                                💔 Bebés fallecidos
+                            </label>
+                            <input type="number" id="bebesFallecidos" name="bebesFallecidos" min="0" max="5" value="0"
+                                class="form-input-embarazo">
+                            <small class="form-hint">Bebés que fallecieron después del nacimiento</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-alert-info">
+                    ℹ️ Los contadores se actualizarán automáticamente al registrar los bebés
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel-modal" onclick="closeEmbarazoModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-save-modal">
+                        <span>💾</span>
+                        Guardar Embarazo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Registro de Bebé -->
+    <div class="modal" id="bebeModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeBebeModal()">×</button>
+            <h2>👶 Registrar Bebé</h2>
+            <p class="modal-subtitle">Complete la información del bebé</p>
+
+            <form id="bebeForm" class="embarazo-form">
+                <input type="hidden" id="bebeId" name="id">
+                <input type="hidden" id="bebeMadreId" name="madreId">
+
+                <div class="form-group-embarazo">
+                    <label>Embarazo Asociado *</label>
+                    <select name="embarazoId" id="selectEmbarazoBebe" required class="form-input-embarazo">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" placeholder="Nombre del bebé" class="form-input-embarazo">
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Sexo</label>
+                    <select name="sexo" class="form-input-embarazo">
+                        <option value="">Seleccione...</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Fecha Nacimiento</label>
+                    <input type="date" name="fechaNacimiento" class="form-input-embarazo">
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Estado *</label>
+                    <select name="estado" required class="form-input-embarazo">
+                        <option value="Por nacer">Por nacer</option>
+                        <option value="Nacido">Nacido</option>
+                        <option value="Fallecido">Fallecido</option>
+                        <option value="Aborto">Aborto</option>
+                        <option value="Muerte gestacional">Muerte gestacional</option>
+                    </select>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Fecha Incidente (si aplica)</label>
+                    <input type="date" name="fechaIncidente" class="form-input-embarazo">
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="esMellizo" value="1" class="form-checkbox-embarazo">
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">Es parto múltiple / Mellizo</span>
+                    </label>
+                </div>
+
+                <div class="form-group-embarazo">
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" rows="3" class="form-input-embarazo"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel-modal" onclick="closeBebeModal()">Cancelar</button>
+                    <button type="submit" class="btn-save-modal">
+                        <span>💾</span> Guardar Bebé
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Visualización de Bebés -->
+    <div class="modal" id="viewBebesModal">
+        <div class="modal-content modal-embarazo">
+            <button class="modal-close" onclick="closeViewBebesModal()">×</button>
+            <h2>👶 Bebés del Embarazo</h2>
+            <div id="viewBebesContent" class="modal-bebes-list-container">
+                <!-- Contenido dinámico -->
+            </div>
         </div>
     </div>
 

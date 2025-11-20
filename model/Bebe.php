@@ -3,7 +3,7 @@
 require_once 'Embarazo.php';
 require_once 'Madre.php';
 
-class Bebe {
+class Bebe implements JsonSerializable {
     // Atributos privados
     private ?int $id;
     private int $embarazoId;
@@ -175,6 +175,25 @@ class Bebe {
 
     public function setUpdatedAt(?string $updatedAt): void {
         $this->updatedAt = $updatedAt;
+    }
+
+    // JsonSerializable implementation
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->id,
+            'embarazoId' => $this->embarazoId,
+            'madreId' => $this->madreId,
+            'nombre' => $this->nombre,
+            'sexo' => $this->sexo,
+            'fechaNacimiento' => $this->fechaNacimiento,
+            'esMellizo' => $this->esMellizo,
+            'estado' => $this->estado,
+            'fechaIncidente' => $this->fechaIncidente,
+            'observaciones' => $this->observaciones,
+            'hasNacido' => $this->hasNacido(),
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt
+        ];
     }
 }
 

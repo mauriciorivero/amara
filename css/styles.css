@@ -1330,3 +1330,961 @@ nav a:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================================
+   SECCIÓN DE BEBÉS
+   ======================================== */
+
+.bebes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.bebes-header h3 {
+    font-size: 20px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.btn-add-bebe {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-bebe:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-add-bebe span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Grid de bebés */
+.bebes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Tarjeta de bebé */
+.bebe-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.bebe-card:hover {
+    border-color: var(--color-primary-pink);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.bebe-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.bebe-icon {
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bebe-info {
+    flex: 1;
+}
+
+.bebe-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.bebe-estado {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.estado-nacido {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.estado-por-nacer {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.estado-muerte {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.estado-aborto {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.estado-fallecido {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.estado-default {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.tag-mellizo {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 4px 8px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Cuerpo de la tarjeta */
+.bebe-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.bebe-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+}
+
+.bebe-detail label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.bebe-detail span {
+    font-size: 13px;
+    color: #1f2937;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Acciones de la tarjeta */
+.bebe-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.btn-edit-bebe,
+.btn-delete-bebe {
+    background: none;
+    border: 2px solid #e5e7eb;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-bebe:hover {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+.btn-delete-bebe:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* Mensaje cuando no hay bebés */
+.no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 14px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Responsive para bebés */
+@media (max-width: 768px) {
+    .bebes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bebes-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .btn-add-bebe {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   SECCIÓN DE EMBARAZOS
+   ======================================== */
+
+.embarazos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.embarazos-header h3 {
+    font-size: 20px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.btn-add-embarazo {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-embarazo:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-add-embarazo span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Grid de embarazos */
+.embarazos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+/* Tarjeta de embarazo */
+.embarazo-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.embarazo-card.embarazo-activo {
+    border-color: #3b82f6;
+    background: linear-gradient(to bottom, #eff6ff 0%, white 100%);
+}
+
+.embarazo-card.embarazo-completo {
+    border-color: #10b981;
+    background: linear-gradient(to bottom, #ecfdf5 0%, white 100%);
+}
+
+.embarazo-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.embarazo-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.embarazo-icon {
+    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.embarazo-info {
+    flex: 1;
+}
+
+.embarazo-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.embarazo-estado-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.estado-en-curso {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.estado-completo {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.tag-multiple {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 4px 8px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Estadísticas del embarazo */
+.embarazo-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.stat-item.stat-highlight {
+    background: #d1fae5;
+    border: 2px solid #10b981;
+}
+
+.stat-item.stat-highlight-blue {
+    background: #dbeafe;
+    border: 2px solid #3b82f6;
+}
+
+.stat-item.stat-warning {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+}
+
+.stat-item.stat-danger {
+    background: #fee2e2;
+    border: 2px solid #ef4444;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-align: center;
+}
+
+.embarazo-total {
+    text-align: center;
+    padding: 10px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.embarazo-fecha {
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.embarazo-fecha small {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+/* Acciones del embarazo */
+.embarazo-card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.btn-view-embarazo {
+    flex: 1;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-view-embarazo:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-edit-embarazo {
+    background: none;
+    border: 2px solid #e5e7eb;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-embarazo:hover {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+/* Resumen de embarazos */
+.embarazos-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+}
+
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.resumen-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.resumen-value.resumen-activo {
+    color: #3b82f6;
+}
+
+.resumen-value.resumen-nacidos {
+    color: #10b981;
+}
+
+/* Modal de bebés del embarazo */
+.modal-bebes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.modal-bebe-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.modal-bebe-icon {
+    font-size: 24px;
+}
+
+.modal-bebe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.modal-bebe-estado {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.modal-bebe-fecha {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Responsive para embarazos */
+@media (max-width: 768px) {
+    .embarazos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .embarazos-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .btn-add-embarazo {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .embarazo-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .embarazos-resumen {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   MODAL DE REGISTRO DE EMBARAZO
+   ======================================== */
+
+.modal-embarazo {
+    max-width: 600px;
+    padding: 35px;
+}
+
+.modal-subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.embarazo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group-embarazo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group-embarazo label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.label-icon {
+    font-size: 18px;
+}
+
+.label-required {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.form-input-embarazo {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-input-embarazo:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.form-input-embarazo:hover {
+    border-color: #c4b5fd;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: -4px;
+}
+
+/* Checkbox personalizado */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label:hover {
+    background: #f3f4f6;
+    border-color: #8b5cf6;
+}
+
+.form-checkbox-embarazo {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.form-checkbox-embarazo:checked+.checkbox-custom {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+.form-checkbox-embarazo:checked+.checkbox-custom::after {
+    content: '✓';
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.checkbox-text {
+    font-size: 15px;
+    color: #374151;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Campos opcionales */
+.form-group-optional {
+    border-top: 2px dashed #e5e7eb;
+    padding-top: 20px;
+}
+
+.btn-toggle-optional {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-toggle-optional:hover {
+    color: #8b5cf6;
+}
+
+#toggleIcon {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.optional-fields {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Alert informativo */
+.form-alert-info {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    border: 2px solid #3b82f6;
+    color: #1e40af;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Acciones del modal */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 2px solid #f3f4f6;
+}
+
+.btn-cancel-modal {
+    flex: 1;
+    padding: 12px 24px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel-modal:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.btn-save-modal {
+    flex: 1;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-save-modal:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-save-modal span {
+    font-size: 18px;
+}
+
+/* Responsive para modal de embarazo */
+@media (max-width: 640px) {
+    .modal-embarazo {
+        max-width: 95%;
+        padding: 25px 20px;
+        margin: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel-modal,
+    .btn-save-modal {
+        width: 100%;
+    }
+
+    .optional-fields {
+        padding: 15px;
+    }
+}
+
+/* Botones de acción adicionales */
+.btn-delete-embarazo {
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-delete-embarazo:hover {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+.btn-edit-bebe,
+.btn-delete-bebe {
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    border: 1px solid transparent;
+}
+
+.btn-edit-bebe {
+    background: #e0e7ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+
+.btn-edit-bebe:hover {
+    background: #c7d2fe;
+    color: #4338ca;
+}
+
+.btn-delete-bebe {
+    background: #fee2e2;
+    color: #ef4444;
+    border-color: #fecaca;
+}
+
+.btn-delete-bebe:hover {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+/* Estilos para lista de bebés en modal */
+.modal-bebes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.modal-bebe-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.modal-bebe-icon {
+    font-size: 24px;
+}
+
+.modal-bebe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.modal-bebe-info strong {
+    font-size: 15px;
+    color: #111827;
+}
+
+.modal-bebe-estado {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.modal-bebe-fecha {
+    font-size: 13px;
+    color: #6b7280;
+}
