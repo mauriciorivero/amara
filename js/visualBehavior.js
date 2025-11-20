@@ -1508,17 +1508,40 @@ async function loadDashboardStats() {
     const totalMadres = document.getElementById('totalMadres');
     if (!totalMadres) return;
 
+    // Cargar estadísticas de Madres
     try {
-        const response = await fetch('api/madres/estadisticas.php');
-        const result = await response.json();
-
-        if (result.success) {
-            document.getElementById('totalMadres').textContent = result.data.total;
-            document.getElementById('totalMadresActivas').textContent = result.data.activas;
-            document.getElementById('totalMadresInactivas').textContent = result.data.inactivas;
+        const responseMadres = await fetch('api/madres/estadisticas.php');
+        if (responseMadres.ok) {
+            const resultMadres = await responseMadres.json();
+            if (resultMadres.success) {
+                document.getElementById('totalMadres').textContent = resultMadres.data.total;
+                document.getElementById('totalMadresActivas').textContent = resultMadres.data.activas;
+                document.getElementById('totalMadresInactivas').textContent = resultMadres.data.inactivas;
+            }
+        } else {
+            console.error('Error HTTP al cargar estadísticas de madres:', responseMadres.status);
         }
     } catch (error) {
-        console.error('Error cargando estadísticas:', error);
+        console.error('Error cargando estadísticas de madres:', error);
+    }
+
+    // Estadísticas de Embarazos y Bebés
+    try {
+        const responseEmbarazos = await fetch('api/embarazos/estadisticas.php');
+        if (responseEmbarazos.ok) {
+            const resultEmbarazos = await responseEmbarazos.json();
+            if (resultEmbarazos.success) {
+                const totalEmbarazosEl = document.getElementById('totalEmbarazos');
+                const totalBebesEl = document.getElementById('totalBebesNacidos');
+
+                if (totalEmbarazosEl) totalEmbarazosEl.textContent = resultEmbarazos.data.totalEmbarazos;
+                if (totalBebesEl) totalBebesEl.textContent = resultEmbarazos.data.totalBebesNacidos;
+            }
+        } else {
+            console.error('Error HTTP al cargar estadísticas de embarazos:', responseEmbarazos.status);
+        }
+    } catch (error) {
+        console.error('Error cargando estadísticas de embarazos:', error);
     }
 }
 
