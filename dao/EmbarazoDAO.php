@@ -18,11 +18,11 @@ class EmbarazoDAO
     public function getAll($limit = 100, $offset = 0)
     {
         $sql = "SELECT e.*, 
-                       m.id as madre_id_real, 
-                       CONCAT(m.primer_nombre, ' ', IFNULL(m.segundo_nombre, ''), ' ', 
-                              m.primer_apellido, ' ', IFNULL(m.segundo_apellido, '')) as madre_nombre
+                       m.id as madre_id_real, m.primer_nombre, m.segundo_nombre, m.primer_apellido, m.segundo_apellido,
+                       o.id as orientadora_id, o.nombre as orientadora_nombre
                 FROM embarazos e
                 INNER JOIN madres m ON e.madre_id = m.id
+                LEFT JOIN orientadoras o ON m.orientadora_id = o.id
                 ORDER BY e.created_at DESC
                 LIMIT :limit OFFSET :offset";
 
@@ -83,11 +83,11 @@ class EmbarazoDAO
         $sql .= " ORDER BY e.created_at DESC";
 
         $stmt = $this->conn->prepare($sql);
-        
+
         if ($madreId !== null) {
             $stmt->bindParam(':madreId', $madreId, PDO::PARAM_INT);
         }
-        
+
         $stmt->execute();
 
         $embarazos = [];
@@ -127,7 +127,7 @@ class EmbarazoDAO
     public function getEmbarazoConBebes($embarazoId)
     {
         require_once __DIR__ . '/BebeDAO.php';
-        
+
         $embarazo = $this->getById($embarazoId);
         if (!$embarazo) {
             return null;
@@ -157,13 +157,13 @@ class EmbarazoDAO
 
         $stmt = $this->conn->prepare($sql);
         $params = $this->mapParams($embarazo);
-        
+
         $result = $stmt->execute($params);
-        
+
         if ($result) {
             $embarazo->setId((int) $this->conn->lastInsertId());
         }
-        
+
         return $result;
     }
 
@@ -281,7 +281,7 @@ class EmbarazoDAO
                     SUM(bebes_fallecidos) as total_bebes_fallecidos,
                     SUM(CASE WHEN es_multiple = 1 THEN 1 ELSE 0 END) as embarazos_multiples
                 FROM embarazos";
-        
+
         $stmt = $this->conn->query($sql);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -318,6 +318,27 @@ class EmbarazoDAO
         $embarazo->setEsMultiple((bool) $row['es_multiple']);
         $embarazo->setCreatedAt($row['created_at']);
         $embarazo->setUpdatedAt($row['updated_at']);
+
+        // Map Madre info if available
+        if (isset($row['madre_id_real'])) {
+            $madre = new Madre('0000-00-00', (int) $row['madre_id_real']);
+            if (isset($row['primer_nombre']))
+                $madre->setPrimerNombre($row['primer_nombre']);
+            if (isset($row['segundo_nombre']))
+                $madre->setSegundoNombre($row['segundo_nombre']);
+            if (isset($row['primer_apellido']))
+                $madre->setPrimerApellido($row['primer_apellido']);
+            if (isset($row['segundo_apellido']))
+                $madre->setSegundoApellido($row['segundo_apellido']);
+
+            // Map Orientadora if available
+            if (!empty($row['orientadora_id'])) {
+                $orientadora = new Orientadora($row['orientadora_nombre'], (int) $row['orientadora_id']);
+                $madre->setOrientadora($orientadora);
+            }
+
+            $embarazo->setMadre($madre);
+        }
 
         return $embarazo;
     }

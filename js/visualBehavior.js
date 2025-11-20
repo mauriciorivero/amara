@@ -1176,8 +1176,318 @@ function openOrientadorasModal() {
     alert('Módulo de Orientadoras en desarrollo');
 }
 
-function openEmbarazosBebesModal() {
-    alert('Módulo de Embarazos y Bebés en desarrollo');
+// Abrir modal global de Embarazos y Bebés
+// Editar embarazo
+async function editarEmbarazo(id) {
+    try {
+        const response = await fetch(`api/embarazos/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const emb = result.data;
+
+            // Abrir modal
+            const modal = document.getElementById('embarazoModal');
+            modal.classList.add('active');
+
+            // Cambiar título del modal
+            modal.querySelector('h2').textContent = '🤰 Editar Embarazo';
+
+            // Llenar formulario
+            const form = document.getElementById('embarazoForm');
+
+            // Agregar campo ID oculto si no existe
+            let idInput = document.getElementById('embarazoId');
+            if (!idInput) {
+                idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.id = 'embarazoId';
+                idInput.name = 'id';
+                form.appendChild(idInput);
+            }
+            idInput.value = emb.id;
+
+            document.getElementById('embarazoMadreId').value = emb.madreId;
+            document.getElementById('totalBebesPorNacer').value = emb.totalBebesPorNacer;
+            document.getElementById('esMultiple').checked = emb.esMultiple;
+
+            // Mostrar campos opcionales si tienen datos
+            const hasOptionalData = emb.totalBebesNacidos > 0 || emb.bebesNoNacidos > 0 || emb.bebesFallecidos > 0;
+            const optionalFields = document.getElementById('optionalFields');
+
+            if (hasOptionalData) {
+                optionalFields.style.display = 'block';
+                document.getElementById('toggleIcon').textContent = '▼';
+            } else {
+                optionalFields.style.display = 'none';
+                document.getElementById('toggleIcon').textContent = '▶';
+            }
+
+            document.getElementById('totalBebesNacidos').value = emb.totalBebesNacidos;
+            document.getElementById('bebesNoNacidos').value = emb.bebesNoNacidos;
+            document.getElementById('bebesFallecidos').value = emb.bebesFallecidos;
+
+        } else {
+            alert('Error al cargar datos: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+// Abrir pantalla global de Embarazos y Bebés
+function openEmbarazosBebesScreen() {
+    // Ocultar tarjetas
+    document.querySelector('.info-section').classList.add('module-active');
+
+    // Mostrar pantalla
+    const screen = document.getElementById('embarazos-bebes-screen');
+    screen.classList.add('active');
+
+    // Asegurar que se muestra la lista y no el detalle
+    showEmbarazosBebesLists();
+
+    loadGlobalEmbarazos();
+    loadGlobalBebes();
+}
+
+function closeEmbarazosBebesScreen() {
+    document.querySelector('.info-section').classList.remove('module-active');
+    document.getElementById('embarazos-bebes-screen').classList.remove('active');
+}
+
+function showEmbarazosBebesLists() {
+    document.getElementById('embarazos-bebes-list-view').classList.add('active');
+    document.getElementById('embarazos-bebes-detail-view').classList.remove('active');
+}
+
+function showEmbarazosBebesDetail(title, content) {
+    document.getElementById('embarazos-bebes-list-view').classList.remove('active');
+    const detailView = document.getElementById('embarazos-bebes-detail-view');
+    detailView.classList.add('active');
+
+    document.getElementById('detail-view-title').textContent = title;
+    document.getElementById('detail-view-content').innerHTML = content;
+}
+
+// Cargar lista global de embarazos
+async function loadGlobalEmbarazos() {
+    const container = document.getElementById('globalEmbarazosList');
+    const countBadge = document.getElementById('globalEmbarazosCount');
+
+    container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
+
+    try {
+        const response = await fetch('api/embarazos/listar.php?limit=50');
+        const result = await response.json();
+
+        if (result.success) {
+            countBadge.textContent = result.pagination.total;
+            renderGlobalEmbarazos(result.data);
+        } else {
+            container.innerHTML = `<div class="error-message">Error: ${result.error}</div>`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="error-message">Error de conexión</div>';
+    }
+}
+
+function renderGlobalEmbarazos(embarazos) {
+    const container = document.getElementById('globalEmbarazosList');
+
+    if (embarazos.length === 0) {
+        container.innerHTML = '<div class="no-data">No hay embarazos registrados.</div>';
+        return;
+    }
+
+    let html = '';
+    embarazos.forEach(emb => {
+        const estadoClass = emb.totalBebesPorNacer > 0 ? 'status-active' : 'status-nacido';
+        const estadoText = emb.totalBebesPorNacer > 0 ? 'En Curso' : 'Completado';
+
+        html += `
+            <div class="global-list-item">
+                <div class="item-info">
+                    <h4>${emb.madreNombre}</h4>
+                    <div class="item-meta">
+                        <div class="meta-row">
+                            <span>👩‍⚕️ Orientadora:</span>
+                            <strong>${emb.orientadoraNombre}</strong>
+                        </div>
+                        <div class="meta-row">
+                            <span>📅 Registrado:</span>
+                            <span>${formatDate(emb.createdAt)}</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="status-badge ${estadoClass}" style="padding: 2px 8px; font-size: 11px;">
+                                ${estadoText}
+                            </span>
+                            ${emb.esMultiple ? '<span class="tag-multiple" style="font-size: 11px;">Múltiple</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-view-detail" onclick="verDetalleEmbarazoGlobal(${emb.id})">
+                        👁️ Ver
+                    </button>
+                    <button class="btn-edit-bebe" onclick="editarEmbarazo(${emb.id})" title="Editar">
+                        ✏️
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Ver detalle de embarazo en la vista global
+async function verDetalleEmbarazoGlobal(id) {
+    try {
+        const response = await fetch(`api/embarazos/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const emb = result.data;
+            const html = `
+                <div class="detail-content">
+                    <div class="detail-section">
+                        <h3>Información General</h3>
+                        <p><strong>Madre:</strong> ${emb.madreNombre || 'Desconocida'}</p>
+                        <p><strong>Orientadora:</strong> ${emb.orientadoraNombre || 'Sin asignar'}</p>
+                        <p><strong>Fecha Registro:</strong> ${formatDate(emb.createdAt)}</p>
+                        <p><strong>Estado:</strong> ${emb.totalBebesPorNacer > 0 ? 'En Curso' : 'Finalizado'}</p>
+                    </div>
+                    <div class="detail-section">
+                        <h3>Estadísticas</h3>
+                        <p><strong>Bebés Nacidos:</strong> ${emb.totalBebesNacidos}</p>
+                        <p><strong>Por Nacer:</strong> ${emb.totalBebesPorNacer}</p>
+                        <p><strong>No Nacidos:</strong> ${emb.bebesNoNacidos}</p>
+                        <p><strong>Fallecidos:</strong> ${emb.bebesFallecidos}</p>
+                    </div>
+                    <div class="detail-actions" style="margin-top: 20px;">
+                        <button class="btn-edit-bebe" onclick="editarEmbarazo(${emb.id})">Editar Embarazo</button>
+                    </div>
+                </div>
+            `;
+            showEmbarazosBebesDetail(`Detalle de Embarazo #${emb.id}`, html);
+        } else {
+            alert('Error al cargar detalles: ' + result.error);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+    }
+}
+
+// Cargar lista global de bebés
+async function loadGlobalBebes() {
+    const container = document.getElementById('globalBebesList');
+    const countBadge = document.getElementById('globalBebesCount');
+
+    container.innerHTML = '<div class="loading-spinner">Cargando...</div>';
+
+    try {
+        const response = await fetch('api/bebes/listar.php?limit=50');
+        const result = await response.json();
+
+        if (result.success) {
+            countBadge.textContent = result.pagination.total;
+            renderGlobalBebes(result.data);
+        } else {
+            container.innerHTML = `<div class="error-message">Error: ${result.error}</div>`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="error-message">Error de conexión</div>';
+    }
+}
+
+function renderGlobalBebes(bebes) {
+    const container = document.getElementById('globalBebesList');
+
+    if (bebes.length === 0) {
+        container.innerHTML = '<div class="no-data">No hay bebés registrados.</div>';
+        return;
+    }
+
+    let html = '';
+    bebes.forEach(bebe => {
+        const sexoIcon = bebe.sexo === 'M' ? '👦' : bebe.sexo === 'F' ? '👧' : '👶';
+        const estadoClass = getEstadoClass(bebe.estado);
+
+        html += `
+            <div class="global-list-item">
+                <div class="item-info">
+                    <h4>${sexoIcon} ${bebe.nombre || 'Sin nombre'}</h4>
+                    <div class="item-meta">
+                        <div class="meta-row">
+                            <span>🤰 Madre:</span>
+                            <strong>${bebe.madreNombre || 'Desconocida'}</strong>
+                        </div>
+                        <div class="meta-row">
+                            <span>🎂 Nacimiento:</span>
+                            <span>${bebe.fechaNacimiento ? formatDate(bebe.fechaNacimiento) : 'Pendiente'}</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="bebe-estado ${estadoClass}" style="font-size: 11px;">
+                                ${bebe.estado}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-view-detail" onclick="verDetalleBebeGlobal(${bebe.id})">
+                        👁️ Ver
+                    </button>
+                    <button class="btn-edit-bebe" onclick="editarBebe(${bebe.id})" title="Editar">
+                        ✏️
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Ver detalle de bebé en la vista global
+async function verDetalleBebeGlobal(id) {
+    try {
+        const response = await fetch(`api/bebes/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const bebe = result.data;
+            const html = `
+                <div class="detail-content">
+                    <div class="detail-section">
+                        <h3>Datos del Bebé</h3>
+                        <p><strong>Nombre:</strong> ${bebe.nombre || 'Sin nombre'}</p>
+                        <p><strong>Sexo:</strong> ${bebe.sexo === 'M' ? 'Masculino' : bebe.sexo === 'F' ? 'Femenino' : 'No especificado'}</p>
+                        <p><strong>Fecha Nacimiento:</strong> ${bebe.fechaNacimiento || 'Pendiente'}</p>
+                        <p><strong>Estado:</strong> ${bebe.estado}</p>
+                        <p><strong>Mellizo:</strong> ${bebe.esMellizo ? 'Sí' : 'No'}</p>
+                    </div>
+                    <div class="detail-section">
+                        <h3>Observaciones</h3>
+                        <p>${bebe.observaciones || 'Ninguna'}</p>
+                    </div>
+                    <div class="detail-actions" style="margin-top: 20px;">
+                        <button class="btn-edit-bebe" onclick="editarBebe(${bebe.id})">Editar Bebé</button>
+                    </div>
+                </div>
+            `;
+            showEmbarazosBebesDetail(`Detalle de Bebé`, html);
+        } else {
+            alert('Error al cargar detalles: ' + result.error);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+    }
 }
 
 function openAliadosModal() {

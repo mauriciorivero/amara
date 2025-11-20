@@ -14,11 +14,13 @@ try {
     $total = $dao->countAll();
 
     // Mapear bebés a formato JSON serializable
-    $bebesData = array_map(function($bebe) {
+    $bebesData = array_map(function ($bebe) {
+        $madre = $bebe->getMadre();
         return [
             'id' => $bebe->getId(),
             'embarazoId' => $bebe->getEmbarazoId(),
             'madreId' => $bebe->getMadreId(),
+            'madreNombre' => $madre ? $madre->getNombreCompleto() : 'Desconocida',
             'nombre' => $bebe->getNombre(),
             'sexo' => $bebe->getSexo(),
             'fechaNacimiento' => $bebe->getFechaNacimiento(),

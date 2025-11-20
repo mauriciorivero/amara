@@ -19,9 +19,7 @@ class BebeDAO
     public function getAll($limit = 100, $offset = 0)
     {
         $sql = "SELECT b.*, 
-                       m.id as madre_id_real, 
-                       CONCAT(m.primer_nombre, ' ', IFNULL(m.segundo_nombre, ''), ' ', 
-                              m.primer_apellido, ' ', IFNULL(m.segundo_apellido, '')) as madre_nombre,
+                       m.id as madre_id_real, m.primer_nombre, m.segundo_nombre, m.primer_apellido, m.segundo_apellido,
                        e.id as embarazo_id_real
                 FROM bebes b
                 INNER JOIN madres m ON b.madre_id = m.id
@@ -136,13 +134,13 @@ class BebeDAO
 
         $stmt = $this->conn->prepare($sql);
         $params = $this->mapParams($bebe);
-        
+
         $result = $stmt->execute($params);
-        
+
         if ($result) {
             $bebe->setId((int) $this->conn->lastInsertId());
         }
-        
+
         return $result;
     }
 
@@ -214,7 +212,7 @@ class BebeDAO
                 FROM bebes 
                 GROUP BY estado 
                 ORDER BY total DESC";
-        
+
         $stmt = $this->conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -257,6 +255,20 @@ class BebeDAO
         $bebe->setObservaciones($row['observaciones']);
         $bebe->setCreatedAt($row['created_at']);
         $bebe->setUpdatedAt($row['updated_at']);
+
+        // Map Madre info if available
+        if (isset($row['madre_id_real'])) {
+            $madre = new Madre('0000-00-00', (int) $row['madre_id_real']);
+            if (isset($row['primer_nombre']))
+                $madre->setPrimerNombre($row['primer_nombre']);
+            if (isset($row['segundo_nombre']))
+                $madre->setSegundoNombre($row['segundo_nombre']);
+            if (isset($row['primer_apellido']))
+                $madre->setPrimerApellido($row['primer_apellido']);
+            if (isset($row['segundo_apellido']))
+                $madre->setSegundoApellido($row['segundo_apellido']);
+            $bebe->setMadre($madre);
+        }
 
         return $bebe;
     }

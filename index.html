@@ -476,7 +476,7 @@
 
                         <div class="card-main-title" style="color: white;">Embarazos y Bebés</div>
                     </div>
-                    <div class="arrow-icon" onclick="openEmbarazosBebesModal()">↗</div>
+                    <div class="arrow-icon" onclick="openEmbarazosBebesScreen()">↗</div>
                 </div>
                 <div class="chart">
                     <!-- Contenido próximamente -->
@@ -516,6 +516,60 @@
                 </div>
                 <div class="chart">
                     <!-- Contenido próximamente -->
+                </div>
+            </div>
+            <!-- Pantalla de Embarazos y Bebés (Inline) -->
+            <div class="module-screen" id="embarazos-bebes-screen">
+                <!-- Vista de Listas (Grid) -->
+                <div class="embarazos-bebes-view active" id="embarazos-bebes-list-view">
+                    <div class="madres-header">
+                        <h2 class="madres-title">🤰 Gestión de Embarazos y Bebés</h2>
+                        <button class="btn-close-madres" onclick="closeEmbarazosBebesScreen()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12">
+                                </path>
+                            </svg>
+                            Cerrar Módulo
+                        </button>
+                    </div>
+
+                    <div class="global-dashboard-grid">
+                        <!-- Columna Embarazos -->
+                        <div class="dashboard-column">
+                            <div class="column-header">
+                                <h3>Historial de Embarazos</h3>
+                                <span class="badge-count" id="globalEmbarazosCount">0</span>
+                            </div>
+                            <div class="list-container" id="globalEmbarazosList">
+                                <div class="loading-spinner">Cargando embarazos...</div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Bebés -->
+                        <div class="dashboard-column">
+                            <div class="column-header">
+                                <h3>Registro de Bebés</h3>
+                                <span class="badge-count" id="globalBebesCount">0</span>
+                            </div>
+                            <div class="list-container" id="globalBebesList">
+                                <div class="loading-spinner">Cargando bebés...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de Detalle (Compartida para Embarazo y Bebé) -->
+                <div class="detail-view-container" id="embarazos-bebes-detail-view">
+                    <div class="detail-header">
+                        <button class="btn-back" onclick="showEmbarazosBebesLists()">
+                            ⬅ Volver a listas
+                        </button>
+                        <h2 id="detail-view-title">Detalle</h2>
+                    </div>
+                    <div id="detail-view-content">
+                        <!-- El contenido se cargará dinámicamente aquí -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -705,6 +759,11 @@
                 <!-- Contenido dinámico -->
             </div>
         </div>
+    </div>
+    </div>
+
+
+
     </div>
 
     <script src="js/visualBehavior.js"></script>
