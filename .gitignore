@@ -25,6 +25,7 @@ config/env.php
 
 # Planes de implementación y documentación temporal
 *.md
-# Permitir solo README
+# Permitir solo README y CLAUDE.md
 !README.md
+!CLAUDE.md
 
