@@ -21,9 +21,14 @@ class Madre implements JsonSerializable
     private ?string $sexo;
     private ?string $numeroTelefono;
     private ?string $otroContacto;
+    private ?string $correoElectronico;
+    private ?string $redesSociales;
+    private ?string $direccion;
+    private ?string $barrio;
+    private ?string $ciudad;
     private int $numeroHijos;
     private int $perdidas;
-    private string $estadoCivil;
+    private ?string $estadoCivil;
     private ?string $nombrePareja;
     private ?string $telefonoPareja;
     private ?string $deAcuerdoAborto;
@@ -61,9 +66,14 @@ class Madre implements JsonSerializable
         ?string $sexo = null,
         ?string $numeroTelefono = null,
         ?string $otroContacto = null,
+        ?string $correoElectronico = null,
+        ?string $redesSociales = null,
+        ?string $direccion = null,
+        ?string $barrio = null,
+        ?string $ciudad = null,
         int $numeroHijos = 0,
         int $perdidas = 0,
-        string $estadoCivil = 'Soltera',
+        ?string $estadoCivil = 'Soltera',
         ?string $nombrePareja = null,
         ?string $telefonoPareja = null,
         ?string $deAcuerdoAborto = null,
@@ -99,6 +109,11 @@ class Madre implements JsonSerializable
         $this->sexo = $sexo;
         $this->numeroTelefono = $numeroTelefono;
         $this->otroContacto = $otroContacto;
+        $this->correoElectronico = $correoElectronico;
+        $this->redesSociales = $redesSociales;
+        $this->direccion = $direccion;
+        $this->barrio = $barrio;
+        $this->ciudad = $ciudad;
         $this->numeroHijos = $numeroHijos;
         $this->perdidas = $perdidas;
         $this->estadoCivil = $estadoCivil;
@@ -195,6 +210,31 @@ class Madre implements JsonSerializable
         return $this->otroContacto;
     }
 
+    public function getCorreoElectronico(): ?string
+    {
+        return $this->correoElectronico;
+    }
+
+    public function getRedesSociales(): ?string
+    {
+        return $this->redesSociales;
+    }
+
+    public function getDireccion(): ?string
+    {
+        return $this->direccion;
+    }
+
+    public function getBarrio(): ?string
+    {
+        return $this->barrio;
+    }
+
+    public function getCiudad(): ?string
+    {
+        return $this->ciudad;
+    }
+
     public function getNumeroHijos(): int
     {
         return $this->numeroHijos;
@@ -205,7 +245,7 @@ class Madre implements JsonSerializable
         return $this->perdidas;
     }
 
-    public function getEstadoCivil(): string
+    public function getEstadoCivil(): ?string
     {
         return $this->estadoCivil;
     }
@@ -394,6 +434,31 @@ class Madre implements JsonSerializable
         $this->otroContacto = $otroContacto;
     }
 
+    public function setCorreoElectronico(?string $correoElectronico): void
+    {
+        $this->correoElectronico = $correoElectronico;
+    }
+
+    public function setRedesSociales(?string $redesSociales): void
+    {
+        $this->redesSociales = $redesSociales;
+    }
+
+    public function setDireccion(?string $direccion): void
+    {
+        $this->direccion = $direccion;
+    }
+
+    public function setBarrio(?string $barrio): void
+    {
+        $this->barrio = $barrio;
+    }
+
+    public function setCiudad(?string $ciudad): void
+    {
+        $this->ciudad = $ciudad;
+    }
+
     public function setNumeroHijos(int $numeroHijos): void
     {
         $this->numeroHijos = $numeroHijos;
@@ -404,7 +469,7 @@ class Madre implements JsonSerializable
         $this->perdidas = $perdidas;
     }
 
-    public function setEstadoCivil(string $estadoCivil): void
+    public function setEstadoCivil(?string $estadoCivil): void
     {
         $this->estadoCivil = $estadoCivil;
     }
@@ -538,6 +603,11 @@ class Madre implements JsonSerializable
             'sexo' => $this->sexo,
             'numeroTelefono' => $this->numeroTelefono,
             'otroContacto' => $this->otroContacto,
+            'correoElectronico' => $this->correoElectronico,
+            'redesSociales' => $this->redesSociales,
+            'direccion' => $this->direccion,
+            'barrio' => $this->barrio,
+            'ciudad' => $this->ciudad,
             'numeroHijos' => $this->numeroHijos,
             'perdidas' => $this->perdidas,
             'estadoCivil' => $this->estadoCivil,

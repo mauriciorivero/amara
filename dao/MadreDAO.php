@@ -195,12 +195,14 @@ class MadreDAO
         $sql = "INSERT INTO madres (
             fecha_ingreso, es_virtual, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
             tipo_documento, numero_documento, fecha_nacimiento, edad, sexo, numero_telefono, otro_contacto,
+            correo_electronico, redes_sociales, direccion, barrio, ciudad,
             numero_hijos, perdidas, estado_civil, nombre_pareja, telefono_pareja, de_acuerdo_aborto,
             nivel_estudio, ocupacion, religion, eps_id, sisben, enfermedades_medicamento, se_entero_por,
             orientadora_id, aliado_id, asiste_discipulado, desvinculo, novedades
         ) VALUES (
             :fechaIngreso, :esVirtual, :primerNombre, :segundoNombre, :primerApellido, :segundoApellido,
             :tipoDocumento, :numeroDocumento, :fechaNacimiento, :edad, :sexo, :numeroTelefono, :otroContacto,
+            :correoElectronico, :redesSociales, :direccion, :barrio, :ciudad,
             :numeroHijos, :perdidas, :estadoCivil, :nombrePareja, :telefonoPareja, :deAcuerdoAborto,
             :nivelEstudio, :ocupacion, :religion, :epsId, :sisben, :enfermedadesMedicamento, :seEnteroPor,
             :orientadoraId, :aliadoId, :asisteDiscipulado, :desvinculo, :novedades
@@ -219,6 +221,8 @@ class MadreDAO
             segundo_nombre = :segundoNombre, primer_apellido = :primerApellido, segundo_apellido = :segundoApellido,
             tipo_documento = :tipoDocumento, numero_documento = :numeroDocumento, fecha_nacimiento = :fechaNacimiento,
             edad = :edad, sexo = :sexo, numero_telefono = :numeroTelefono, otro_contacto = :otroContacto,
+            correo_electronico = :correoElectronico, redes_sociales = :redesSociales, direccion = :direccion,
+            barrio = :barrio, ciudad = :ciudad,
             numero_hijos = :numeroHijos, perdidas = :perdidas, estado_civil = :estadoCivil, 
             nombre_pareja = :nombrePareja, telefono_pareja = :telefonoPareja, de_acuerdo_aborto = :deAcuerdoAborto,
             nivel_estudio = :nivelEstudio, ocupacion = :ocupacion, religion = :religion, eps_id = :epsId,
@@ -251,6 +255,11 @@ class MadreDAO
             ':sexo' => $madre->getSexo(),
             ':numeroTelefono' => $madre->getNumeroTelefono(),
             ':otroContacto' => $madre->getOtroContacto(),
+            ':correoElectronico' => $madre->getCorreoElectronico(),
+            ':redesSociales' => $madre->getRedesSociales(),
+            ':direccion' => $madre->getDireccion(),
+            ':barrio' => $madre->getBarrio(),
+            ':ciudad' => $madre->getCiudad(),
             ':numeroHijos' => $madre->getNumeroHijos(),
             ':perdidas' => $madre->getPerdidas(),
             ':estadoCivil' => $madre->getEstadoCivil(),
@@ -315,6 +324,11 @@ class MadreDAO
         $madre->setSexo($row['sexo']);
         $madre->setNumeroTelefono($row['numero_telefono']);
         $madre->setOtroContacto($row['otro_contacto']);
+        $madre->setCorreoElectronico($row['correo_electronico']);
+        $madre->setRedesSociales($row['redes_sociales']);
+        $madre->setDireccion($row['direccion']);
+        $madre->setBarrio($row['barrio']);
+        $madre->setCiudad($row['ciudad']);
         $madre->setNumeroHijos((int) $row['numero_hijos']);
         $madre->setPerdidas((int) $row['perdidas']);
         $madre->setEstadoCivil($row['estado_civil']);

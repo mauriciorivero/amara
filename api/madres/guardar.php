@@ -39,6 +39,11 @@ try {
     $madre->setEdad(!empty($input['edad']) ? (int) $input['edad'] : null);
     $madre->setNumeroTelefono($input['numeroTelefono'] ?? null);
     $madre->setOtroContacto($input['otroContacto'] ?? null);
+    $madre->setCorreoElectronico($input['correoElectronico'] ?? null);
+    $madre->setRedesSociales($input['redesSociales'] ?? null);
+    $madre->setDireccion($input['direccion'] ?? null);
+    $madre->setBarrio($input['barrio'] ?? null);
+    $madre->setCiudad($input['ciudad'] ?? null);
     $madre->setEsVirtual(isset($input['esVirtual']) && $input['esVirtual'] == '1');
 
     $madre->setEstadoCivil($input['estadoCivil'] ?? null);
