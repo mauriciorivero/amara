@@ -6,6 +6,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AMARA is a PHP/MySQL web application for managing maternal health programs. It's a monolithic application with a PHP backend (MVC-like pattern) and vanilla JavaScript frontend served as a single `index.html` page. The app tracks mothers, pregnancies, babies, programs, and allied organizations offering support services.
 
+### Domain Context
+
+AMARA is designed for a **Colombian non-profit organization** that provides support to pregnant women and mothers. The system reflects Colombian healthcare context:
+
+- **EPS** (Entidad Promotora de Salud): Colombian health insurance providers
+- **SISBEN**: Colombian social welfare classification system for subsidies
+- **Document types**: CC (Cédula de Ciudadanía), TI (Tarjeta de Identidad), CE (Cédula de Extranjería), etc.
+
+**Organization's mission**: Accompany women facing difficult pregnancies, providing counseling (via "orientadoras"), material assistance, and connection to support programs from allied organizations.
+
+### Entity Descriptions
+
+| Entity | Purpose |
+|--------|--------|
+| **Madre** | Woman registered in the program. Contains demographics, contact info, partner details, health info (EPS, conditions), and program status |
+| **Embarazo** | Pregnancy record linked to a mother. Tracks baby counts: born, unborn, deceased, stillborn. Supports multiple pregnancies per mother |
+| **Bebe** | Child record linked to pregnancy and mother. Tracks name, sex, birth date, and status (born, unborn, deceased) |
+| **Orientadora** | Counselor/mentor who accompanies mothers through the program |
+| **OrientadoraMadre** | Many-to-many relationship between orientadoras and madres (assignment history) |
+| **Aliado** | External partner organization that offers support programs |
+| **Programa** | Support program (own or from ally) with responsible person and dates |
+| **MadrePrograma** | Enrollment of a mother in a specific program |
+| **Ayuda** | Material assistance delivered to mother or baby (kits, economic aid, supplies) |
+| **Eps** | Health insurance provider catalog |
+| **Usuario** | System user for authentication |
+| **LogActividad** | Activity log for auditing |
+
 ## Architecture
 
 ### Backend Stack
@@ -20,9 +47,9 @@ AMARA is a PHP/MySQL web application for managing maternal health programs. It's
 - `Database.php`: Singleton PDO connection with env variable loading
 - `env.php`: Database and app configuration (DO NOT commit with real credentials)
 
-**`/model`** - Data entities (11 files)
+**`/model`** - Data entities (12 files)
 - Core entities: `Madre.php`, `Embarazo.php`, `Bebe.php`, `Programa.php`, `Aliado.php`, `Ayuda.php`
-- Support entities: `MadrePrograma.php`, `Orientadora.php`, `Eps.php`, `Usuario.php`, `LogActividad.php`
+- Support entities: `MadrePrograma.php`, `Orientadora.php`, `OrientadoraMadre.php`, `Eps.php`, `Usuario.php`, `LogActividad.php`
 - All model classes implement `JsonSerializable` for API responses
 
 **`/dao`** - Data Access Objects (9 files)
@@ -205,6 +232,45 @@ Each module with filters follows this pattern:
 - `feat: Implement 'Ayudas' module` (commit 381affb): Support module with help/assistance tracking
 - `feat: Add Embarazos y Bebés module` (commit 7d1ec96): Pregnancy tracking with search
 
+## Business Rules
+
+### Madre Status
+- **Active**: `desvinculo` is NULL or empty
+- **Inactive**: `desvinculo = 'X'` marks the mother as withdrawn from the program
+- Method `isActiva()` returns true when `desvinculo !== 'X'`
+
+### Bebe States
+Valid values for `estado` field:
+- `Por nacer` - Unborn (default)
+- `Nacido` - Born alive
+- `Fallecido` - Deceased after birth
+- `No nacido` - Stillborn or miscarriage
+
+### Ayuda Types
+Valid values for `tipoAyuda` field:
+- `kit_recien_nacido` - Newborn kit (requires `bebeId`)
+- `salud_recien_nacido` - Newborn health assistance (requires `bebeId`)
+- `elementos_recien_nacido` - Newborn supplies (requires `bebeId`)
+- Other types for mother assistance (no `bebeId` required)
+
+### Ayuda Origin
+Valid values for `origenAyuda` field:
+- `corporacion` - From the organization itself (default)
+- `aliado` - From an allied organization
+
+### Programa Types
+- `esPropio = true` - Program run by the organization
+- `esPropio = false` - Program from an allied organization (requires `aliadoId`)
+
+### Key Madre Fields
+| Field | Description |
+|-------|-------------|
+| `deAcuerdoAborto` | Partner's position on abortion |
+| `asisteDiscipulado` | Whether mother attends religious discipleship |
+| `seEnteroPor` | How mother learned about the program |
+| `esVirtual` | Whether mother receives virtual (remote) support |
+| `perdidas` | Number of pregnancy losses |
+
 ## Code Style Notes
 
 - PHP: Snake_case for database columns, camelCase for PHP properties
@@ -219,3 +285,52 @@ Each module with filters follows this pattern:
 - Recent commits show feature additions (modules) and bug fixes
 - Implementation docs often committed alongside code (e.g., `IMPLEMENTACION_EMBARAZOS.md`, `walkthrough.md`)
 - Temporary docs added to .gitignore as of commit a458b70
+
+## Quick Reference
+
+### API Endpoints by Module
+
+| Module | Endpoints |
+|--------|----------|
+| `/api/madres/` | listar, obtener, guardar, eliminar |
+| `/api/embarazos/` | listar, obtener, guardar, eliminar, estadisticas, por_madre, activos |
+| `/api/bebes/` | listar, obtener, guardar, eliminar, por_embarazo |
+| `/api/programas/` | listar, obtener, guardar, eliminar, activos, por_aliado, estadisticas |
+| `/api/aliados/` | listar, obtener, guardar, eliminar, activos |
+| `/api/ayudas/` | listar, obtener, guardar, eliminar, por_madre, estadisticas, tipos |
+| `/api/orientadoras/` | listar, obtener, guardar, eliminar, activas, asignar_madre, desasignar_madre, madres_asignadas, estadisticas |
+| `/api/madres_programas/` | listar, obtener, guardar, eliminar, por_madre, por_programa, estadisticas |
+| `/api/eps/` | listar |
+| `/api/reportes/` | madres_vinculadas_excel, madres_desvinculadas_excel |
+
+## Reports Module
+
+The reports module uses **Composer** with the following dependencies:
+- `phpoffice/phpspreadsheet` (v5.4) - Excel file generation
+- `tecnickcom/tcpdf` (v6.10) - PDF generation (available for future reports)
+
+### Available Reports
+
+| Report | Endpoint | Description |
+|--------|----------|-------------|
+| Madres Vinculadas | `/api/reportes/madres_vinculadas_excel.php` | Excel export of all active mothers |
+| Madres Desvinculadas | `/api/reportes/madres_desvinculadas_excel.php` | Excel export of all withdrawn mothers |
+| Ayudas Total | `/api/reportes/ayudas_total_excel.php` | Excel export of all delivered assistance with details and values |
+| Ayudas por Madre | `/api/reportes/ayudas_por_madre_excel.php` | Summary of assistance per mother with totals and types |
+
+### Adding New Reports
+
+1. Create endpoint in `/api/reportes/` following existing patterns
+2. Include `require_once __DIR__ . '/../../vendor/autoload.php';` for Composer autoload
+3. Add report card in `index.html` inside `#reportesModal .reportes-grid`
+4. Add endpoint mapping in `downloadReport()` function in `js/visualBehavior.js`
+
+### Composer Commands
+
+```bash
+# Using MAMP's PHP and Composer
+/Applications/MAMP/bin/php/php8.3.14/bin/php /Applications/MAMP/bin/php/composer install
+
+# Add new dependency
+/Applications/MAMP/bin/php/php8.3.14/bin/php /Applications/MAMP/bin/php/composer require <package-name>
+```

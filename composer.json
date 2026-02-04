@@ -1,0 +1,9 @@
+{
+    "name": "amara/amara",
+    "description": "Sistema de gestión de salud materna",
+    "type": "project",
+    "require": {
+        "phpoffice/phpspreadsheet": "^5.4",
+        "tecnickcom/tcpdf": "^6.10"
+    }
+}

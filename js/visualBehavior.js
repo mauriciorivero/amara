@@ -4022,3 +4022,181 @@ if (document.getElementById('orientadoraModal')) {
         }
     });
 }
+
+// ========================================
+// MÓDULO DE REPORTES
+// ========================================
+
+// Abrir modal de reportes
+function openReportesModal(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    const modal = document.getElementById('reportesModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Cerrar modal de reportes
+function closeReportesModal() {
+    const modal = document.getElementById('reportesModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Descargar reporte
+function downloadReport(reportType) {
+    const endpoints = {
+        'madres_vinculadas': 'api/reportes/madres_vinculadas_excel.php',
+        'madres_desvinculadas': 'api/reportes/madres_desvinculadas_excel.php',
+        'ayudas_total': 'api/reportes/ayudas_total_excel.php',
+        'ayudas_por_madre': 'api/reportes/ayudas_por_madre_excel.php'
+    };
+
+    const endpoint = endpoints[reportType];
+    if (!endpoint) {
+        alert('Tipo de reporte no válido');
+        return;
+    }
+
+    // Mostrar indicador de carga
+    const btn = event.target.closest('button');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+    btn.disabled = true;
+
+    // Crear enlace de descarga
+    const link = document.createElement('a');
+    link.href = endpoint;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Restaurar botón después de un momento
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }, 2000);
+}
+
+// Cerrar modal de reportes al hacer clic fuera
+if (document.getElementById('reportesModal')) {
+    document.getElementById('reportesModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeReportesModal();
+        }
+    });
+}
+
+// Variables globales para búsqueda de madre en reportes
+let selectedMadreForReport = null;
+let searchMadreTimeout = null;
+
+// Buscar madre para reporte con autocompletado
+async function searchMadreForReport(query) {
+    const suggestionsContainer = document.getElementById('madreReporteSuggestions');
+    const downloadBtn = document.getElementById('btnDownloadAyudasMadre');
+    
+    // Limpiar timeout anterior
+    if (searchMadreTimeout) {
+        clearTimeout(searchMadreTimeout);
+    }
+    
+    // Si el query está vacío, ocultar sugerencias
+    if (!query || query.trim().length < 2) {
+        suggestionsContainer.classList.remove('active');
+        suggestionsContainer.innerHTML = '';
+        selectedMadreForReport = null;
+        downloadBtn.disabled = true;
+        return;
+    }
+    
+    // Esperar 300ms antes de buscar (debounce)
+    searchMadreTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`api/madres/buscar.php?q=${encodeURIComponent(query.trim())}`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                renderMadreSuggestions(result.data);
+            } else {
+                suggestionsContainer.innerHTML = '<div class="autocomplete-suggestion-item" style="color: #9ca3af; cursor: default;">No se encontraron resultados</div>';
+                suggestionsContainer.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Error al buscar madres:', error);
+            suggestionsContainer.classList.remove('active');
+        }
+    }, 300);
+}
+
+// Renderizar sugerencias de madres
+function renderMadreSuggestions(madres) {
+    const suggestionsContainer = document.getElementById('madreReporteSuggestions');
+    
+    suggestionsContainer.innerHTML = madres.map(madre => `
+        <div class="autocomplete-suggestion-item" onclick="selectMadreForReport(${madre.id}, '${madre.nombreCompleto.replace(/'/g, "\\'")}')">
+            <div class="suggestion-name">${madre.nombreCompleto}</div>
+            <div class="suggestion-doc">${madre.tipoDocumento} ${madre.numeroDocumento}</div>
+        </div>
+    `).join('');
+    
+    suggestionsContainer.classList.add('active');
+}
+
+// Seleccionar madre para reporte
+function selectMadreForReport(madreId, nombreCompleto) {
+    selectedMadreForReport = madreId;
+    
+    const input = document.getElementById('searchMadreReporte');
+    const suggestionsContainer = document.getElementById('madreReporteSuggestions');
+    const downloadBtn = document.getElementById('btnDownloadAyudasMadre');
+    
+    input.value = nombreCompleto;
+    suggestionsContainer.classList.remove('active');
+    suggestionsContainer.innerHTML = '';
+    downloadBtn.disabled = false;
+}
+
+// Descargar reporte de ayudas por madre específica
+function downloadReportAyudasPorMadre() {
+    if (!selectedMadreForReport) {
+        alert('Por favor seleccione una madre de la lista');
+        return;
+    }
+    
+    const btn = document.getElementById('btnDownloadAyudasMadre');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+    btn.disabled = true;
+    
+    // Crear enlace de descarga con parámetro de madre
+    const endpoint = `api/reportes/ayudas_por_madre_excel.php?madre_id=${selectedMadreForReport}`;
+    const link = document.createElement('a');
+    link.href = endpoint;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Restaurar botón después de un momento
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }, 2000);
+}
+
+// Cerrar sugerencias al hacer clic fuera
+document.addEventListener('click', function(e) {
+    const suggestionsContainer = document.getElementById('madreReporteSuggestions');
+    const searchInput = document.getElementById('searchMadreReporte');
+    
+    if (suggestionsContainer && searchInput) {
+        if (!suggestionsContainer.contains(e.target) && e.target !== searchInput) {
+            suggestionsContainer.classList.remove('active');
+        }
+    }
+});

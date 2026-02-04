@@ -24,7 +24,7 @@
                 <a href="#blog">Aliados</a>
                 <a href="#blog">Embarazos</a>
             </nav>
-            <a href="#" class="download-btn">Registro de cambios</a>
+            <a href="#" class="download-btn" onclick="openReportesModal(event)">Reportes</a>
         </header>
 
         <section class="info-section">
@@ -1838,6 +1838,133 @@
 
 
 
+    </div>
+
+    <!-- Modal de Reportes -->
+    <div id="reportesModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content reportes-modal">
+            <div class="modal-header">
+                <h2>Centro de Reportes</h2>
+                <button class="modal-close-btn" onclick="closeReportesModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="reportes-description">Seleccione el reporte que desea generar. Los reportes se descargarán en formato Excel (.xlsx).</p>
+                
+                <div class="reportes-grid">
+                    <!-- Reporte: Madres Vinculadas -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #27ae60;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Madres Vinculadas</h3>
+                            <p>Listado completo de todas las madres actualmente activas en el programa.</p>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReport('madres_vinculadas')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Madres Desvinculadas -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #c0392b;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <line x1="18" y1="8" x2="23" y2="13"></line>
+                                <line x1="23" y1="8" x2="18" y2="13"></line>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Madres Desvinculadas</h3>
+                            <p>Listado de madres que han sido desvinculadas del programa.</p>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReport('madres_desvinculadas')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Ayudas Entregadas Total -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #8e44ad;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Ayudas Entregadas (Total)</h3>
+                            <p>Listado completo de todas las ayudas entregadas con detalles y valores.</p>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReport('ayudas_total')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Ayudas por Madre -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #16a085;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M20 8v6"></path>
+                                <path d="M23 11h-6"></path>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Ayudas por Madre</h3>
+                            <p>Resumen de ayudas recibidas por una madre específica.</p>
+                        </div>
+                        <div class="reporte-search-container">
+                            <label for="searchMadreReporte" class="reporte-search-label">Buscar madre:</label>
+                            <div class="autocomplete-wrapper">
+                                <input 
+                                    type="text" 
+                                    id="searchMadreReporte" 
+                                    class="reporte-search-input"
+                                    placeholder="Nombre o número de documento..."
+                                    autocomplete="off"
+                                    oninput="searchMadreForReport(this.value)"
+                                />
+                                <div id="madreReporteSuggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReportAyudasPorMadre()" id="btnDownloadAyudasMadre" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/visualBehavior.js"></script>
