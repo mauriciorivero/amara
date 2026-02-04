@@ -4058,7 +4058,15 @@ function downloadReport(reportType) {
         'madres_vinculadas': 'api/reportes/madres_vinculadas_excel.php',
         'madres_desvinculadas': 'api/reportes/madres_desvinculadas_excel.php',
         'ayudas_total': 'api/reportes/ayudas_total_excel.php',
-        'ayudas_por_madre': 'api/reportes/ayudas_por_madre_excel.php'
+        'ayudas_por_madre': 'api/reportes/ayudas_por_madre_excel.php',
+        'bebes_nacidos': 'api/reportes/bebes_nacidos_excel.php',
+        'bebes_por_nacer': 'api/reportes/bebes_por_nacer_excel.php',
+        'hijos_registrados': 'api/reportes/hijos_registrados_excel.php',
+        'hijos_por_mama': 'api/reportes/hijos_por_mama_excel.php',
+        'mamas_por_eps': 'api/reportes/mamas_por_eps_excel.php',
+        'mamas_por_consejera': 'api/reportes/mamas_por_consejera_excel.php',
+        'mamas_por_programas': 'api/reportes/mamas_por_programas_excel.php',
+        'programas_por_mamas': 'api/reportes/programas_por_mamas_excel.php'
     };
 
     const endpoint = endpoints[reportType];
