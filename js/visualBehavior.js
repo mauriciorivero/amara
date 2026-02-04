@@ -439,19 +439,25 @@ function registrarBebe(madreId) {
 // Registrar bebé desde vista global (requiere selección de madre)
 function registrarBebeGlobal() {
     console.log('Registrar bebé desde vista global');
-    
+
     const modal = document.getElementById('bebeModal');
     const form = document.getElementById('bebeForm');
     const selectMadreContainer = document.getElementById('selectMadreBebeContainer');
     const selectEmbarazo = document.getElementById('selectEmbarazoBebe');
-    
+
     // Resetear formulario
     form.reset();
     document.getElementById('bebeId').value = '';
     document.getElementById('bebeMadreId').value = '';
     document.getElementById('searchMadreBebe').value = '';
     document.getElementById('selectedMadreBebeId').value = '';
-    
+
+    // Ocultar campo ID al crear nuevo bebé
+    const idField = document.getElementById('bebeIdField');
+    if (idField) {
+        idField.style.display = 'none';
+    }
+
     // Mostrar contenedor de búsqueda de madre
     selectMadreContainer.style.display = 'block';
     
@@ -896,6 +902,9 @@ function renderBebesList(bebes) {
                     <div class="bebe-icon">${sexoIcon}</div>
                     <div class="bebe-info">
                         <h4>${bebe.nombre || 'Sin nombre'}</h4>
+                        <div style="font-size: 0.85em; color: #666; margin-top: 4px;">
+                            ID: ${bebe.id}
+                        </div>
                         <span class="bebe-estado ${estadoClass}">${bebe.estado}</span>
                         ${mellizoTag}
                     </div>
@@ -986,6 +995,14 @@ function editarBebe(id) {
                 form.reset();
                 document.getElementById('bebeId').value = bebe.id;
                 document.getElementById('bebeMadreId').value = bebe.madreId;
+
+                // Mostrar y poblar campo ID
+                const idField = document.getElementById('bebeIdField');
+                const idDisplay = document.getElementById('bebeIdDisplay');
+                if (idField && idDisplay) {
+                    idField.style.display = 'block';
+                    idDisplay.textContent = bebe.id;
+                }
 
                 // Cargar embarazos y seleccionar el correcto
                 const selectEmbarazo = document.getElementById('selectEmbarazoBebe');
@@ -1640,6 +1657,10 @@ function renderGlobalBebes(bebes) {
                     <h4>${sexoIcon} ${bebe.nombre || 'Sin nombre'}</h4>
                     <div class="item-meta">
                         <div class="meta-row">
+                            <span><strong>ID:</strong></span>
+                            <strong>${bebe.id}</strong>
+                        </div>
+                        <div class="meta-row">
                             <span>🤰 Madre:</span>
                             <strong>${bebe.madreNombre || 'Desconocida'}</strong>
                         </div>
@@ -1681,6 +1702,7 @@ async function verDetalleBebeGlobal(id) {
                 <div class="detail-content">
                     <div class="detail-section">
                         <h3>Datos del Bebé</h3>
+                        <p><strong>ID:</strong> ${bebe.id}</p>
                         <p><strong>Nombre:</strong> ${bebe.nombre || 'Sin nombre'}</p>
                         <p><strong>Sexo:</strong> ${bebe.sexo === 'M' ? 'Masculino' : bebe.sexo === 'F' ? 'Femenino' : 'No especificado'}</p>
                         <p><strong>Fecha Nacimiento:</strong> ${bebe.fechaNacimiento || 'Pendiente'}</p>
@@ -1759,6 +1781,9 @@ async function loadDashboardStats() {
     } catch (error) {
         console.error('Error cargando estadísticas de embarazos:', error);
     }
+
+    // Estadísticas de Orientadoras
+    loadOrientadorasStats();
 }
 
 // Configurar búsqueda de embarazos y bebés
@@ -3562,4 +3587,438 @@ function formatEstadoPrograma(estado) {
         'finalizado': '<span class="badge badge-programa-finalizado">🏁 Finalizado</span>'
     };
     return badges[estado] || estado;
+}
+
+// ========================================
+// GESTIÓN DE ORIENTADORAS
+// ========================================
+
+// Variables globales para orientadoras
+let orientadorasCurrentPage = 1;
+let orientadorasPerPage = 25;
+let orientadorasFilters = {
+    search: '',
+    activa: ''
+};
+
+// Funciones de navegación
+function openOrientadorasScreen() {
+    const orientadorasScreen = document.getElementById('orientadoras-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    if (orientadorasScreen && infoSection) {
+        orientadorasScreen.classList.add('active');
+        infoSection.classList.add('module-active');
+        loadOrientadoras();
+        setupOrientadorasFilters();
+    }
+}
+
+function closeOrientadorasScreen() {
+    const orientadorasScreen = document.getElementById('orientadoras-screen');
+    const infoSection = document.querySelector('.info-section');
+
+    if (orientadorasScreen && infoSection) {
+        orientadorasScreen.classList.remove('active');
+        infoSection.classList.remove('module-active');
+    }
+}
+
+// Funciones de carga de datos
+async function loadOrientadoras() {
+    try {
+        const params = new URLSearchParams({
+            page: orientadorasCurrentPage,
+            limit: orientadorasPerPage,
+            search: orientadorasFilters.search,
+            activa: orientadorasFilters.activa
+        });
+
+        const response = await fetch(`api/orientadoras/listar.php?${params}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderOrientadorasTable(result.data);
+            renderOrientadorasPagination(result.pagination);
+        } else {
+            console.error('Error al cargar orientadoras');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function loadOrientadorasStats() {
+    try {
+        const response = await fetch('api/orientadoras/estadisticas.php');
+        const result = await response.json();
+
+        if (result.success) {
+            if (document.getElementById('totalOrientadoras')) {
+                document.getElementById('totalOrientadoras').textContent = result.data.total || 0;
+            }
+            if (document.getElementById('madresAtendidasPorOrientadoras')) {
+                document.getElementById('madresAtendidasPorOrientadoras').textContent = result.data.madresAtendidas || 0;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading orientadoras stats:', error);
+    }
+}
+
+// Funciones de renderizado
+function renderOrientadorasTable(orientadoras) {
+    const tbody = document.getElementById('orientadorasTableBody');
+
+    if (!tbody) return;
+
+    if (orientadoras.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; color: #9ca3af;">No hay orientadoras registradas</td></tr>';
+        return;
+    }
+
+    let html = '';
+    orientadoras.forEach(o => {
+        const estadoBadge = o.activa
+            ? '<span class="badge-active" style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Activa</span>'
+            : '<span class="badge-inactive" style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Inactiva</span>';
+
+        html += `
+            <tr style="border-bottom: 1px solid #f3f4f6;">
+                <td style="padding: 16px;">${o.id}</td>
+                <td style="padding: 16px; font-weight: 500;">${o.nombre}</td>
+                <td style="padding: 16px; text-align: center;">${estadoBadge}</td>
+                <td style="padding: 16px; text-align: center;">${formatDate(o.createdAt || o.created_at)}</td>
+                <td style="padding: 16px; text-align: center;">
+                    <button onclick="verHistorialOrientadora(${o.id}, '${o.nombre}')" title="Ver Historial de Madres"
+                            style="background: #f0fdf4; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 8px;">
+                        📋
+                    </button>
+                    <button onclick="editOrientadora(${o.id})" title="Editar"
+                            style="background: #eff6ff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 8px;">
+                        ✏️
+                    </button>
+                    <button onclick="deleteOrientadora(${o.id})" title="Eliminar"
+                            style="background: #fef2f2; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function renderOrientadorasPagination(pagination) {
+    const container = document.getElementById('orientadorasPagination');
+    if (!container || !pagination) return;
+
+    let html = '';
+
+    // Botón anterior
+    if (pagination.page > 1) {
+        html += `<button onclick="cambiarPaginaOrientadoras(${pagination.page - 1})"
+                         style="padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">
+                    ← Anterior
+                </button>`;
+    }
+
+    // Números de página
+    html += `<span style="padding: 8px 16px;">
+        Página ${pagination.page} de ${pagination.pages} (Total: ${pagination.total})
+    </span>`;
+
+    // Botón siguiente
+    if (pagination.page < pagination.pages) {
+        html += `<button onclick="cambiarPaginaOrientadoras(${pagination.page + 1})"
+                         style="padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">
+                    Siguiente →
+                </button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function cambiarPaginaOrientadoras(page) {
+    orientadorasCurrentPage = page;
+    loadOrientadoras();
+}
+
+// Funciones de modal y CRUD
+function openOrientadoraModal() {
+    const form = document.getElementById('orientadoraForm');
+    if (form) {
+        form.reset();
+        document.getElementById('orientadoraId').value = '';
+        document.getElementById('orientadoraModalTitle').textContent = '👩‍💼 Nueva Orientadora';
+        document.getElementById('orientadoraActiva').checked = true;
+        document.getElementById('orientadoraModal').classList.add('active');
+    }
+}
+
+function closeOrientadoraModal() {
+    const modal = document.getElementById('orientadoraModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+async function editOrientadora(id) {
+    try {
+        const response = await fetch(`api/orientadoras/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const o = result.data;
+            document.getElementById('orientadoraId').value = o.id;
+            document.getElementById('orientadoraNombre').value = o.nombre;
+            document.getElementById('orientadoraActiva').checked = o.activa;
+            document.getElementById('orientadoraModalTitle').textContent = '👩‍💼 Editar Orientadora';
+            document.getElementById('orientadoraModal').classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar orientadora');
+    }
+}
+
+async function guardarOrientadora(event) {
+    event.preventDefault();
+
+    const formData = {
+        id: document.getElementById('orientadoraId').value || null,
+        nombre: document.getElementById('orientadoraNombre').value.trim(),
+        activa: document.getElementById('orientadoraActiva').checked
+    };
+
+    if (!formData.nombre) {
+        alert('El nombre es requerido');
+        return;
+    }
+
+    try {
+        const response = await fetch('api/orientadoras/guardar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            closeOrientadoraModal();
+            loadOrientadoras();
+            loadOrientadorasStats();
+            alert(result.message);
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+async function deleteOrientadora(id) {
+    if (!confirm('¿Está seguro de eliminar esta orientadora?')) return;
+
+    try {
+        const response = await fetch('api/orientadoras/eliminar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            loadOrientadoras();
+            loadOrientadorasStats();
+            alert('Orientadora eliminada correctamente');
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+// Funciones de filtros
+function setupOrientadorasFilters() {
+    if (window.orientadorasFiltersSetup) return;
+    window.orientadorasFiltersSetup = true;
+
+    const searchInput = document.getElementById('searchOrientadora');
+    const activaSelect = document.getElementById('filterOrientadoraActiva');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            orientadorasFilters.search = e.target.value;
+            orientadorasCurrentPage = 1;
+            loadOrientadoras();
+        });
+    }
+
+    if (activaSelect) {
+        activaSelect.addEventListener('change', (e) => {
+            orientadorasFilters.activa = e.target.value;
+            orientadorasCurrentPage = 1;
+            loadOrientadoras();
+        });
+    }
+}
+
+function clearOrientadorasFilters() {
+    const searchInput = document.getElementById('searchOrientadora');
+    const activaSelect = document.getElementById('filterOrientadoraActiva');
+
+    if (searchInput) searchInput.value = '';
+    if (activaSelect) activaSelect.value = '';
+
+    orientadorasFilters = { search: '', activa: '' };
+    orientadorasCurrentPage = 1;
+    loadOrientadoras();
+}
+
+// ========================================
+// HISTORIAL DE ORIENTADORA-MADRE
+// ========================================
+
+let historialOrientadoraData = [];
+let historialOrientadoraFiltro = 'todas';
+
+// Abrir modal de historial
+async function verHistorialOrientadora(orientadoraId, orientadoraNombre) {
+    const modal = document.getElementById('historialOrientadoraModal');
+    document.getElementById('orientadoraNombreHistorial').textContent = orientadoraNombre;
+
+    modal.classList.add('active');
+
+    // Reset tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('tabTodasMadres').classList.add('active');
+    historialOrientadoraFiltro = 'todas';
+
+    // Cargar datos
+    await loadHistorialOrientadora(orientadoraId);
+}
+
+// Cerrar modal
+function closeHistorialOrientadoraModal() {
+    const modal = document.getElementById('historialOrientadoraModal');
+    modal.classList.remove('active');
+    historialOrientadoraData = [];
+}
+
+// Cargar historial desde API
+async function loadHistorialOrientadora(orientadoraId) {
+    const tbody = document.getElementById('historialOrientadoraTableBody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">Cargando historial...</td></tr>';
+
+    try {
+        const response = await fetch(`api/orientadoras/historial.php?orientadoraId=${orientadoraId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            historialOrientadoraData = result.data;
+
+            // Actualizar contadores en tabs
+            document.getElementById('countTodasMadres').textContent = result.estadisticas.madresHistoricas;
+            document.getElementById('countActivasMadres').textContent = result.estadisticas.madresActivas;
+            document.getElementById('countInactivasMadres').textContent = result.estadisticas.madresInactivas;
+
+            // Renderizar tabla
+            renderHistorialOrientadoraTable(historialOrientadoraData);
+        } else {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: #dc2626;">Error: ${result.error}</td></tr>`;
+        }
+    } catch (error) {
+        console.error('Error cargando historial:', error);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #dc2626;">Error de conexión</td></tr>';
+    }
+}
+
+// Renderizar tabla de historial
+function renderHistorialOrientadoraTable(data) {
+    const tbody = document.getElementById('historialOrientadoraTableBody');
+
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">No hay registros para mostrar</td></tr>';
+        return;
+    }
+
+    let html = '';
+    data.forEach(asignacion => {
+        const estadoBadge = asignacion.activa
+            ? '<span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ Activa</span>'
+            : '<span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">⏸️ Finalizada</span>';
+
+        const fechaFin = asignacion.fechaFin ? formatFechaHistorial(asignacion.fechaFin) : '-';
+        const duracion = asignacion.duracionDias + ' días';
+
+        html += `
+            <tr style="border-bottom: 1px solid #f3f4f6;">
+                <td style="padding: 12px;">${asignacion.madreNombre}</td>
+                <td style="padding: 12px;">${asignacion.madreDocumento || 'N/A'}</td>
+                <td style="padding: 12px;">${asignacion.madreTelefono || 'N/A'}</td>
+                <td style="padding: 12px;">${formatFechaHistorial(asignacion.fechaAsignacion)}</td>
+                <td style="padding: 12px;">${fechaFin}</td>
+                <td style="padding: 12px;">${duracion}</td>
+                <td style="padding: 12px; text-align: center;">${estadoBadge}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+// Filtrar historial por estado
+function filtrarHistorialOrientadora(filtro) {
+    // Actualizar tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    if (filtro === 'todas') {
+        document.getElementById('tabTodasMadres').classList.add('active');
+    } else if (filtro === 'activas') {
+        document.getElementById('tabActivasMadres').classList.add('active');
+    } else if (filtro === 'inactivas') {
+        document.getElementById('tabInactivasMadres').classList.add('active');
+    }
+
+    historialOrientadoraFiltro = filtro;
+
+    // Filtrar datos
+    let dataFiltrada = historialOrientadoraData;
+
+    if (filtro === 'activas') {
+        dataFiltrada = historialOrientadoraData.filter(a => a.activa);
+    } else if (filtro === 'inactivas') {
+        dataFiltrada = historialOrientadoraData.filter(a => !a.activa);
+    }
+
+    renderHistorialOrientadoraTable(dataFiltrada);
+}
+
+// Helper: Formatear fecha para historial
+function formatFechaHistorial(dateString) {
+    if (!dateString) return '-';
+    const parts = dateString.split('-');
+    if (parts.length !== 3) return dateString;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+// Event listener para el formulario
+if (document.getElementById('orientadoraForm')) {
+    document.getElementById('orientadoraForm').addEventListener('submit', guardarOrientadora);
+}
+
+// Cerrar modal al hacer clic fuera
+if (document.getElementById('orientadoraModal')) {
+    document.getElementById('orientadoraModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeOrientadoraModal();
+        }
+    });
 }

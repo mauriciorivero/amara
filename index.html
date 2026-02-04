@@ -556,6 +556,26 @@
                     <div class="stat-text">$<span id="totalValorAyudas">0</span> Entregado</div>
                 </div>
             </div>
+
+            <!-- Card de Orientadoras -->
+            <div class="info-card community" data-card>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Nuestras</div>
+                        <div class="card-main-title">Orientadoras</div>
+                    </div>
+                    <div class="arrow-icon" onclick="openOrientadorasScreen()">↗</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👩‍💼</div>
+                    <div class="stat-text"><span id="totalOrientadoras">0</span> Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🤰</div>
+                    <div class="stat-text"><span id="madresAtendidasPorOrientadoras">0</span> Madres Atendidas</div>
+                </div>
+            </div>
+
             <!-- Pantalla de Embarazos y Bebés (Inline) -->
             <div class="module-screen" id="embarazos-bebes-screen">
                 <!-- Vista de Listas (Grid) -->
@@ -998,6 +1018,79 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pantalla de Orientadoras -->
+            <div class="module-screen" id="orientadoras-screen">
+                <!-- Vista Principal: Lista de Orientadoras -->
+                <div class="ayudas-view active" id="orientadoras-list-view">
+                    <div class="madres-header" style="padding: 20px 30px; margin: 0;">
+                        <h2 class="madres-title">👩‍💼 Gestión de Orientadoras</h2>
+                        <div class="madres-header-buttons">
+                            <button class="btn-add-primary" onclick="openOrientadoraModal()">
+                                <span class="btn-icon">+</span>
+                                Nueva Orientadora
+                            </button>
+                            <button class="btn-close-madres" onclick="closeOrientadorasScreen()">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar Módulo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <input type="text" id="searchOrientadora" class="filter-input search-input"
+                                   placeholder="🔍 Buscar por nombre...">
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Estado</label>
+                                <select id="filterOrientadoraActiva" class="filter-select">
+                                    <option value="">Todas</option>
+                                    <option value="activa">Activas</option>
+                                    <option value="inactiva">Inactivas</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-filter-clear" onclick="clearOrientadorasFilters()">Limpiar filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Orientadoras -->
+                    <div class="table-wrapper">
+                        <table class="madres-table-modern">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orientadorasTableBody">
+                                <tr>
+                                    <td colspan="5" class="td-center">Cargando orientadoras...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination-modern">
+                        <div class="pagination-info">
+                            Mostrando <span id="orientadorasShowingCount">0</span> orientadoras
+                        </div>
+                        <div id="orientadorasPagination" class="pagination-controls">
+                            <!-- Controles de paginación dinámicos -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -1128,6 +1221,12 @@
                 <input type="hidden" id="bebeId" name="id">
                 <input type="hidden" id="bebeMadreId" name="madreId">
 
+                <!-- Campo ID (solo lectura, visible al editar) -->
+                <div class="form-group-embarazo full-width" id="bebeIdField" style="display: none;">
+                    <label>ID:</label>
+                    <div class="readonly-field" id="bebeIdDisplay">-</div>
+                </div>
+
                 <!-- Selector de Madre (visible solo en vista global) -->
                 <div class="form-group-embarazo full-width" id="selectMadreBebeContainer" style="display: none;">
                     <label for="searchMadreBebe">
@@ -1217,6 +1316,52 @@
             <h2>👶 Bebés del Embarazo</h2>
             <div id="viewBebesContent" class="modal-bebes-list-container">
                 <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Historial de Madres por Orientadora -->
+    <div class="modal" id="historialOrientadoraModal">
+        <div class="modal-content modal-historial" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeHistorialOrientadoraModal()">×</button>
+            <h2 class="modal-title" id="historialModalTitle">📋 Historial de Madres Asignadas</h2>
+            <p class="modal-subtitle">Orientadora: <strong id="orientadoraNombreHistorial"></strong></p>
+
+            <!-- Tabs para filtrar -->
+            <div class="tabs-container" style="margin: 20px 0; border-bottom: 2px solid #e5e7eb;">
+                <button class="tab-btn active" onclick="filtrarHistorialOrientadora('todas')" id="tabTodasMadres">
+                    Todas (<span id="countTodasMadres">0</span>)
+                </button>
+                <button class="tab-btn" onclick="filtrarHistorialOrientadora('activas')" id="tabActivasMadres">
+                    Activas (<span id="countActivasMadres">0</span>)
+                </button>
+                <button class="tab-btn" onclick="filtrarHistorialOrientadora('inactivas')" id="tabInactivasMadres">
+                    Históricas (<span id="countInactivasMadres">0</span>)
+                </button>
+            </div>
+
+            <!-- Tabla de historial -->
+            <div id="historialOrientadoraContent" style="max-height: 500px; overflow-y: auto; padding: 20px;">
+                <table class="data-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Madre</th>
+                            <th>Documento</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Asignación</th>
+                            <th>Fecha Fin</th>
+                            <th>Duración</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historialOrientadoraTableBody">
+                        <tr><td colspan="7" style="text-align: center; padding: 30px;">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeHistorialOrientadoraModal()">Cerrar</button>
             </div>
         </div>
     </div>
@@ -1643,6 +1788,52 @@
             </form>
         </div>
     </div>
+    </div>
+
+    <!-- Modal de Orientadora -->
+    <div class="modal" id="orientadoraModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeOrientadoraModal()">×</button>
+            <h2 id="orientadoraModalTitle">👩‍💼 Nueva Orientadora</h2>
+            <p class="modal-subtitle">Complete la información de la orientadora</p>
+
+            <form id="orientadoraForm" class="embarazo-form">
+                <input type="hidden" id="orientadoraId">
+
+                <div class="form-group-embarazo full-width">
+                    <label for="orientadoraNombre">
+                        <span class="label-icon">👤</span>
+                        Nombre Completo
+                        <span class="label-required">*</span>
+                    </label>
+                    <input type="text" id="orientadoraNombre" name="nombre" required
+                           class="form-input-embarazo"
+                           placeholder="Ej: María Rodríguez Pérez">
+                </div>
+
+                <div class="form-group-embarazo full-width">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="orientadoraActiva" name="activa" checked
+                               style="width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-weight: 500;">Activa</span>
+                    </label>
+                    <small style="color: #6b7280; margin-left: 30px; display: block; margin-top: 5px;">
+                        Las orientadoras inactivas no aparecerán en los selectores de asignación
+                    </small>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn-cancel" onclick="closeOrientadoraModal()"
+                            style="padding: 12px 24px; border: 1px solid #ddd; background: white; border-radius: 8px; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary"
+                            style="padding: 12px 24px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
 

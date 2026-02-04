@@ -2017,6 +2017,20 @@ nav a:hover {
     border-color: #c4b5fd;
 }
 
+/* Campo de solo lectura */
+.readonly-field {
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+}
+
 /* Estilos para autocompletado de búsqueda de madre */
 .autocomplete-results {
     position: absolute;
@@ -2844,6 +2858,25 @@ nav a:hover {
     border: 1px solid #9ca3af;
 }
 
+/* Badge styles for orientadoras */
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* Vista de detalle */
 .detail-card {
     background: white;
@@ -3128,5 +3161,85 @@ nav a:hover {
 #aliadoModal,
 #programaModal {
     z-index: 10000;
+}
+
+/* ========================================
+   MODAL DE HISTORIAL DE ORIENTADORAS
+   ======================================== */
+
+/* Modal de Historial */
+.modal-historial {
+    max-width: 900px;
+}
+
+.tabs-container {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: #1f2937;
+    background: #f9fafb;
+}
+
+.tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+/* Estilo de tabla dentro del modal de historial */
+.modal-historial .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.modal-historial .data-table thead {
+    background: #f9fafb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-historial .data-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.modal-historial .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    color: white;
+}
+
+.modal-historial .data-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.modal-historial .data-table tbody tr:hover {
+    background: #dbeafe;
+    transform: scale(1.01);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modal-historial .data-table tbody tr:hover td {
+    color: #1e40af;
 }
 

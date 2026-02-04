@@ -48,16 +48,71 @@ try {
 
     $madre->setEpsId(!empty($input['epsId']) ? (int) $input['epsId'] : null);
     $madre->setSisben($input['sisben'] ?? null);
-    $madre->setOrientadoraId(!empty($input['orientadoraId']) ? (int) $input['orientadoraId'] : null);
     $madre->setAliadoId(!empty($input['aliadoId']) ? (int) $input['aliadoId'] : null);
+
+    // Nueva lógica: Detectar cambio de orientadora
+    $nuevaOrientadoraId = !empty($input['orientadoraId']) ? (int) $input['orientadoraId'] : null;
+    $orientadoraCambio = false;
 
     // Guardar
     if ($madre->getId()) {
+        // ES UNA ACTUALIZACIÓN
+
+        // Obtener madre actual de BD para comparar
+        $madreActual = $dao->getById($madre->getId());
+        $orientadoraActualId = $madreActual ? $madreActual->getOrientadoraId() : null;
+
+        // Detectar si cambió la orientadora
+        if ($orientadoraActualId !== $nuevaOrientadoraId) {
+            $orientadoraCambio = true;
+        }
+
+        // Actualizar madre (SIN orientadora_id por ahora)
+        $madre->setOrientadoraId($orientadoraActualId); // Mantener valor actual temporalmente
         $resultado = $dao->update($madre);
         $mensaje = 'Madre actualizada correctamente';
+
+        // Si cambió orientadora, usar sistema de historial
+        if ($resultado && $orientadoraCambio) {
+            require_once __DIR__ . '/../../dao/OrientadoraDAO.php';
+            $orientadoraDAO = new OrientadoraDAO();
+
+            if ($nuevaOrientadoraId !== null) {
+                // Asignar nueva orientadora
+                $orientadoraDAO->createAsignacion(
+                    $nuevaOrientadoraId,
+                    $madre->getId(),
+                    date('Y-m-d'),
+                    'Cambio desde módulo de madres',  // Motivo por defecto
+                    null  // Sin observaciones
+                );
+            } else {
+                // Desasignar orientadora (cambió a null)
+                $orientadoraDAO->desasignarMadre(
+                    $madre->getId(),
+                    date('Y-m-d'),
+                    'Desasignación desde módulo de madres'
+                );
+            }
+        }
     } else {
+        // ES UNA CREACIÓN
+        $madre->setOrientadoraId($nuevaOrientadoraId);
         $resultado = $dao->create($madre);
         $mensaje = 'Madre registrada correctamente';
+
+        // Si tiene orientadora, crear registro inicial en historial
+        if ($resultado && $nuevaOrientadoraId !== null) {
+            require_once __DIR__ . '/../../dao/OrientadoraDAO.php';
+            $orientadoraDAO = new OrientadoraDAO();
+            $orientadoraDAO->createAsignacion(
+                $nuevaOrientadoraId,
+                $madre->getId(),
+                date('Y-m-d'),
+                'Asignación inicial',
+                null
+            );
+        }
     }
 
     if ($resultado) {
