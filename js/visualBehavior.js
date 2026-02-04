@@ -3111,6 +3111,9 @@ function renderProgramasTable(programas) {
                 <button class="btn-action btn-view" onclick="viewProgramaDetail(${programa.id})" title="Ver detalle">
                     👁️
                 </button>
+                <button class="btn-action btn-primary" onclick="openSesionesFormacionModal(${programa.id}, '${(programa.nombre || '').replace(/'/g, "\\'")}')" title="Sesiones de Formación">
+                    📚
+                </button>
                 <button class="btn-action btn-edit" onclick="editarPrograma(${programa.id})" title="Editar">
                     ✏️
                 </button>
@@ -3434,6 +3437,9 @@ function renderProgramaDetail(programa) {
         </div>
 
         <div class="detail-actions">
+            <button class="btn-action btn-primary" onclick="openSesionesFormacionModal(${programa.id}, '${programa.nombre.replace(/'/g, "\\'")}')">
+                📚 Sesiones de Formación
+            </button>
             <button class="btn-action btn-edit" onclick="editarPrograma(${programa.id})">
                 ✏️ Editar
             </button>
@@ -4199,4 +4205,382 @@ document.addEventListener('click', function(e) {
             suggestionsContainer.classList.remove('active');
         }
     }
+    
+    const madreAsistenteSuggestions = document.getElementById('madreAsistenteSuggestions');
+    const buscarMadreAsistente = document.getElementById('buscarMadreAsistente');
+    if (madreAsistenteSuggestions && buscarMadreAsistente) {
+        if (!madreAsistenteSuggestions.contains(e.target) && e.target !== buscarMadreAsistente) {
+            madreAsistenteSuggestions.classList.remove('active');
+        }
+    }
 });
+
+// ========================================
+// SESIONES DE FORMACIÓN
+// ========================================
+
+let currentProgramaIdSesiones = null;
+let currentProgramaNombreSesiones = null;
+let madresAsistentesSeleccionadas = [];
+let searchMadreAsistenteTimeout = null;
+
+function openSesionesFormacionModal(programaId, programaNombre) {
+    currentProgramaIdSesiones = programaId;
+    currentProgramaNombreSesiones = programaNombre;
+    
+    document.getElementById('sesionesFormacionProgramaNombre').textContent = programaNombre;
+    document.getElementById('sesionFormProgramaId').value = programaId;
+    
+    const modal = document.getElementById('sesionesFormacionModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadSesionesFormacion(programaId);
+    }
+}
+
+function closeSesionesFormacionModal() {
+    const modal = document.getElementById('sesionesFormacionModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    cancelarSesionForm();
+    currentProgramaIdSesiones = null;
+    currentProgramaNombreSesiones = null;
+}
+
+async function loadSesionesFormacion(programaId) {
+    try {
+        const response = await fetch(`api/sesiones_formacion/por_programa.php?programaId=${programaId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            if (result.estadisticas) {
+                document.getElementById('statDiscipulado').textContent = result.estadisticas.sesiones_discipulado || 0;
+                document.getElementById('statConsejeria').textContent = result.estadisticas.sesiones_consejeria || 0;
+                document.getElementById('statCapacitacion').textContent = result.estadisticas.sesiones_capacitacion || 0;
+                document.getElementById('statReunion').textContent = result.estadisticas.sesiones_reunion || 0;
+            }
+            renderSesionesFormacionLista(result.data);
+        } else {
+            document.getElementById('sesionesFormacionListaContent').innerHTML = 
+                '<p style="text-align: center; color: #ef4444;">Error al cargar las sesiones</p>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('sesionesFormacionListaContent').innerHTML = 
+            '<p style="text-align: center; color: #ef4444;">Error de conexión</p>';
+    }
+}
+
+function renderSesionesFormacionLista(sesiones) {
+    const container = document.getElementById('sesionesFormacionListaContent');
+    
+    if (!sesiones || sesiones.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">No hay sesiones registradas para este programa</p>';
+        return;
+    }
+
+    const tipoLabels = {
+        'discipulado': { label: 'Discipulado', color: '#92400e', bg: '#fef3c7' },
+        'consejeria': { label: 'Consejería', color: '#1e40af', bg: '#dbeafe' },
+        'capacitacion': { label: 'Capacitación', color: '#166534', bg: '#dcfce7' },
+        'reunion_tematica': { label: 'Reunión Temática', color: '#6b21a8', bg: '#f3e8ff' }
+    };
+
+    let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+    
+    sesiones.forEach(sesion => {
+        const tipo = tipoLabels[sesion.tipoSesion] || { label: sesion.tipoSesion, color: '#6b7280', bg: '#f3f4f6' };
+        const fechaFormateada = formatDate(sesion.fechaSesion);
+        
+        html += `
+            <div class="sesion-card" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${tipo.bg}; color: ${tipo.color};">
+                            ${tipo.label}
+                        </span>
+                        <span style="margin-left: 12px; color: #6b7280; font-size: 14px;">
+                            ${fechaFormateada}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="editarSesionFormacion(${sesion.id})" style="background: none; border: none; cursor: pointer; color: #4A90A4; padding: 4px;" title="Editar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button onclick="eliminarSesionFormacion(${sesion.id})" style="background: none; border: none; cursor: pointer; color: #ef4444; padding: 4px;" title="Eliminar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong style="color: #374151;">Responsables:</strong>
+                    <span style="color: #6b7280;">${sesion.responsables}</span>
+                </div>
+                ${sesion.temasTratados ? `
+                <div style="margin-bottom: 8px;">
+                    <strong style="color: #374151;">Temas:</strong>
+                    <span style="color: #6b7280;">${sesion.temasTratados}</span>
+                </div>
+                ` : ''}
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                    <span style="color: #6b7280; font-size: 14px;">
+                        <strong>${sesion.totalAsistentes || 0}</strong> asistentes
+                    </span>
+                    ${sesion.madresAsistentes && sesion.madresAsistentes.length > 0 ? `
+                    <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">
+                        (${sesion.madresAsistentes.slice(0, 3).map(m => m.nombre).join(', ')}${sesion.madresAsistentes.length > 3 ? '...' : ''})
+                    </span>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function openNuevaSesionForm() {
+    document.getElementById('sesionFormId').value = '';
+    document.getElementById('sesionFormTitle').textContent = 'Nueva Sesión de Formación';
+    document.getElementById('sesionTipoSesion').value = '';
+    document.getElementById('sesionFechaSesion').value = new Date().toISOString().split('T')[0];
+    document.getElementById('sesionResponsables').value = '';
+    document.getElementById('sesionTemasTratados').value = '';
+    document.getElementById('sesionObservaciones').value = '';
+    
+    madresAsistentesSeleccionadas = [];
+    renderMadresAsistentesSeleccionadas();
+    
+    document.getElementById('nuevaSesionForm').style.display = 'block';
+}
+
+function cancelarSesionForm() {
+    document.getElementById('nuevaSesionForm').style.display = 'none';
+    madresAsistentesSeleccionadas = [];
+}
+
+async function guardarSesionFormacion() {
+    const id = document.getElementById('sesionFormId').value;
+    const programaId = document.getElementById('sesionFormProgramaId').value || currentProgramaIdSesiones;
+    const tipoSesion = document.getElementById('sesionTipoSesion').value;
+    const fechaSesion = document.getElementById('sesionFechaSesion').value;
+    const responsables = document.getElementById('sesionResponsables').value.trim();
+    const temasTratados = document.getElementById('sesionTemasTratados').value.trim();
+    const observaciones = document.getElementById('sesionObservaciones').value.trim();
+
+    if (!tipoSesion) {
+        alert('Seleccione el tipo de sesión');
+        return;
+    }
+    if (!fechaSesion) {
+        alert('Ingrese la fecha de la sesión');
+        return;
+    }
+    if (!responsables) {
+        alert('Ingrese los responsables de la sesión');
+        return;
+    }
+
+    const data = {
+        programaId: parseInt(programaId),
+        tipoSesion,
+        fechaSesion,
+        responsables,
+        temasTratados: temasTratados || null,
+        observaciones: observaciones || null,
+        madresAsistentes: madresAsistentesSeleccionadas.map(m => m.id)
+    };
+
+    if (id) {
+        data.id = parseInt(id);
+    }
+
+    try {
+        const response = await fetch('api/sesiones_formacion/guardar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            cancelarSesionForm();
+            loadSesionesFormacion(currentProgramaIdSesiones);
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al guardar la sesión');
+    }
+}
+
+async function editarSesionFormacion(id) {
+    try {
+        const response = await fetch(`api/sesiones_formacion/obtener.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const sesion = result.data;
+            
+            document.getElementById('sesionFormId').value = sesion.id;
+            document.getElementById('sesionFormTitle').textContent = 'Editar Sesión de Formación';
+            document.getElementById('sesionTipoSesion').value = sesion.tipoSesion;
+            document.getElementById('sesionFechaSesion').value = sesion.fechaSesion;
+            document.getElementById('sesionResponsables').value = sesion.responsables;
+            document.getElementById('sesionTemasTratados').value = sesion.temasTratados || '';
+            document.getElementById('sesionObservaciones').value = sesion.observaciones || '';
+            
+            madresAsistentesSeleccionadas = sesion.madresAsistentes || [];
+            renderMadresAsistentesSeleccionadas();
+            
+            document.getElementById('nuevaSesionForm').style.display = 'block';
+        } else {
+            alert('Error al cargar la sesión: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+async function eliminarSesionFormacion(id) {
+    if (!confirm('¿Está seguro de eliminar esta sesión de formación?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('api/sesiones_formacion/eliminar.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            loadSesionesFormacion(currentProgramaIdSesiones);
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
+async function buscarMadreAsistente(query) {
+    const suggestionsContainer = document.getElementById('madreAsistenteSuggestions');
+    
+    if (searchMadreAsistenteTimeout) {
+        clearTimeout(searchMadreAsistenteTimeout);
+    }
+    
+    if (!query || query.trim().length < 2) {
+        suggestionsContainer.classList.remove('active');
+        return;
+    }
+    
+    searchMadreAsistenteTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`api/madres/buscar.php?q=${encodeURIComponent(query.trim())}`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(madre => {
+                    const yaSeleccionada = madresAsistentesSeleccionadas.some(m => m.id === madre.id);
+                    if (!yaSeleccionada) {
+                        const nombreCompleto = madre.nombreCompleto || '';
+                        const documento = madre.numeroDocumento || '';
+                        html += `
+                            <div class="autocomplete-suggestion-item" onclick="agregarMadreAsistente(${madre.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '')">
+                                <strong>${nombreCompleto}</strong>
+                                <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;">${documento}</span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                if (html) {
+                    suggestionsContainer.innerHTML = html;
+                    suggestionsContainer.classList.add('active');
+                } else {
+                    suggestionsContainer.innerHTML = '<div class="autocomplete-suggestion-item" style="color: #9ca3af;">Todas las coincidencias ya están seleccionadas</div>';
+                    suggestionsContainer.classList.add('active');
+                }
+            } else {
+                suggestionsContainer.innerHTML = '<div class="autocomplete-suggestion-item" style="color: #9ca3af;">No se encontraron resultados</div>';
+                suggestionsContainer.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }, 300);
+}
+
+function agregarMadreAsistente(id, nombre, apellido) {
+    if (!madresAsistentesSeleccionadas.some(m => m.id === id)) {
+        madresAsistentesSeleccionadas.push({ id, nombre, apellido });
+        renderMadresAsistentesSeleccionadas();
+    }
+    
+    document.getElementById('buscarMadreAsistente').value = '';
+    document.getElementById('madreAsistenteSuggestions').classList.remove('active');
+}
+
+function quitarMadreAsistente(id) {
+    madresAsistentesSeleccionadas = madresAsistentesSeleccionadas.filter(m => m.id !== id);
+    renderMadresAsistentesSeleccionadas();
+}
+
+function renderMadresAsistentesSeleccionadas() {
+    const container = document.getElementById('madresAsistentesSeleccionadas');
+    
+    if (madresAsistentesSeleccionadas.length === 0) {
+        container.innerHTML = '<span style="color: #9ca3af; font-size: 14px;">No hay madres seleccionadas</span>';
+        return;
+    }
+    
+    let html = '';
+    madresAsistentesSeleccionadas.forEach(madre => {
+        const nombreMostrar = madre.nombre + (madre.apellido ? ' ' + madre.apellido : '');
+        html += `
+            <span style="display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 13px;">
+                ${nombreMostrar}
+                <button onclick="quitarMadreAsistente(${madre.id})" style="background: none; border: none; cursor: pointer; color: #0369a1; padding: 0; display: flex;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </span>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Cerrar modal de sesiones al hacer clic fuera
+if (document.getElementById('sesionesFormacionModal')) {
+    document.getElementById('sesionesFormacionModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeSesionesFormacionModal();
+        }
+    });
+}

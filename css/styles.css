@@ -3494,11 +3494,11 @@ nav a:hover {
 }
 
 .autocomplete-suggestion-item:hover {
-    background-color: #f0fdf4;
+    background-color: #086223;
 }
 
 .autocomplete-suggestion-item.selected {
-    background-color: #d1fae5;
+    background-color: #086223;
 }
 
 .suggestion-name {
