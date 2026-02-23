@@ -3264,8 +3264,8 @@ nav a:hover {
 .modal-content.reportes-modal {
     background: #ffffff;
     border-radius: 16px;
-    width: 90%;
-    max-width: 700px;
+    width: 80vw;
+    max-width: 1200px;
     max-height: 90vh;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -3334,8 +3334,20 @@ nav a:hover {
 
 .reportes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
+}
+
+@media (max-width: 1100px) {
+    .reportes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .reportes-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .reporte-card {
@@ -3460,6 +3472,23 @@ nav a:hover {
     outline: none;
     border-color: #16a085;
     box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1);
+}
+
+.reporte-select-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background-color: white;
+    cursor: pointer;
+}
+
+.reporte-select-input:focus {
+    outline: none;
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
 }
 
 .autocomplete-suggestions {

@@ -1080,26 +1080,50 @@ async function editMadre(madreId) {
 
             // Llenar campos
             form.madreId.value = madre.id;
+            // Información Personal
             form.primerNombre.value = madre.primerNombre || '';
             form.segundoNombre.value = madre.segundoNombre || '';
             form.primerApellido.value = madre.primerApellido || '';
             form.segundoApellido.value = madre.segundoApellido || '';
             form.tipoDocumento.value = madre.tipoDocumento || 'CC';
             form.numeroDocumento.value = madre.numeroDocumento || '';
+            form.fechaNacimiento.value = madre.fechaNacimiento || '';
+            form.edad.value = madre.edad || '';
+            form.esVirtual.value = madre.esVirtual ? '1' : '0';
+            form.estadoCivil.value = madre.estadoCivil || '';
+            form.nombrePareja.value = madre.nombrePareja || '';
+            form.telefonoPareja.value = madre.telefonoPareja || '';
+            form.deAcuerdoAborto.value = madre.deAcuerdoAborto || '';
+            // Contacto y Ubicación
             form.numeroTelefono.value = madre.numeroTelefono || '';
             form.otroContacto.value = madre.otroContacto || '';
-            form.esVirtual.value = madre.esVirtual ? '1' : '0';
-
-            form.estadoCivil.value = madre.estadoCivil || 'Soltera';
+            form.contactoParentezco.value = madre.contactoParentezco || '';
+            form.contactoTelefono.value = madre.contactoTelefono || '';
+            form.correoElectronico.value = madre.correoElectronico || '';
+            form.redesSociales.value = madre.redesSociales || '';
+            form.direccion.value = madre.direccion || '';
+            form.barrio.value = madre.barrio || '';
+            form.ciudad.value = madre.ciudad || '';
+            form.seEnteroPor.value = madre.seEnteroPor || '';
+            // Información Socioeconómica
             form.ocupacion.value = madre.ocupacion || '';
             form.nivelEstudio.value = madre.nivelEstudio || '';
             form.religion.value = madre.religion || '';
-
+            form.seCongrega.value = madre.seCongrega || '';
+            form.iglesiasCongrega.value = madre.iglesiasCongrega || '';
+            // Salud y Seguimiento
             form.epsId.value = madre.epsId || '';
             form.sisben.value = madre.sisben || '';
             form.orientadoraId.value = madre.orientadoraId || '';
             form.aliadoId.value = madre.aliadoId || '';
             form.fechaIngreso.value = madre.fechaIngreso || '';
+            form.totalMuertesGestacionales.value = madre.totalMuertesGestacionales ?? 0;
+            form.totalAbortos.value = madre.totalAbortos ?? 0;
+            form.edadHijos.value = madre.edadHijos || '';
+            form.condicionFarmacodependiente.value = madre.condicionFarmacodependiente || '';
+            form.sustanciaConsume.value = madre.sustanciaConsume || '';
+            form.tiempoConsumoSustancia.value = madre.tiempoConsumoSustancia || '';
+            form.tratamientoPorConsumo.value = madre.tratamientoPorConsumo || '';
 
         } else {
             alert('Error al cargar datos para edición: ' + result.error);
@@ -4041,6 +4065,10 @@ function openReportesModal(event) {
     const modal = document.getElementById('reportesModal');
     if (modal) {
         modal.style.display = 'flex';
+        // Cargar años disponibles para los reportes por año
+        loadAniosDisponibles();
+        loadAniosDesvinculadasDisponibles();
+        loadAniosAyudasDisponibles();
     }
 }
 
@@ -4222,6 +4250,189 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+// Cargar años disponibles para reporte de madres vinculadas por año
+async function loadAniosDisponibles() {
+    const select = document.getElementById('selectAnioReporte');
+    const btn = document.getElementById('btnDownloadMadresPorAnio');
+    
+    if (!select) return;
+    
+    try {
+        const response = await fetch('api/reportes/anios_disponibles.php');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            select.innerHTML = '<option value="">Seleccione un año...</option>';
+            result.data.forEach(anio => {
+                select.innerHTML += `<option value="${anio}">${anio}</option>`;
+            });
+            
+            // Habilitar botón cuando se seleccione un año
+            select.addEventListener('change', function() {
+                btn.disabled = !this.value;
+            });
+        } else {
+            select.innerHTML = '<option value="">No hay años disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar años:', error);
+        select.innerHTML = '<option value="">Error al cargar años</option>';
+    }
+}
+
+// Descargar reporte de madres vinculadas por año
+function downloadReportMadresPorAnio() {
+    const select = document.getElementById('selectAnioReporte');
+    const anio = select ? select.value : null;
+    
+    if (!anio) {
+        alert('Por favor seleccione un año');
+        return;
+    }
+    
+    const btn = document.getElementById('btnDownloadMadresPorAnio');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+    btn.disabled = true;
+    
+    // Crear enlace de descarga con parámetro de año
+    const endpoint = `api/reportes/madres_vinculadas_por_anio_excel.php?anio=${anio}`;
+    const link = document.createElement('a');
+    link.href = endpoint;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Restaurar botón después de un momento
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }, 2000);
+}
+
+// Cargar años disponibles para reporte de madres desvinculadas por año
+async function loadAniosDesvinculadasDisponibles() {
+    const select = document.getElementById('selectAnioDesvinculadasReporte');
+    const btn = document.getElementById('btnDownloadMadresDesvinculadasPorAnio');
+    
+    if (!select) return;
+    
+    try {
+        const response = await fetch('api/reportes/anios_desvinculadas.php');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            select.innerHTML = '<option value="">Seleccione un año...</option>';
+            result.data.forEach(anio => {
+                select.innerHTML += `<option value="${anio}">${anio}</option>`;
+            });
+            
+            // Habilitar botón cuando se seleccione un año
+            select.addEventListener('change', function() {
+                btn.disabled = !this.value;
+            });
+        } else {
+            select.innerHTML = '<option value="">No hay años disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar años:', error);
+        select.innerHTML = '<option value="">Error al cargar años</option>';
+    }
+}
+
+// Descargar reporte de madres desvinculadas por año
+function downloadReportMadresDesvinculadasPorAnio() {
+    const select = document.getElementById('selectAnioDesvinculadasReporte');
+    const anio = select ? select.value : null;
+    
+    if (!anio) {
+        alert('Por favor seleccione un año');
+        return;
+    }
+    
+    const btn = document.getElementById('btnDownloadMadresDesvinculadasPorAnio');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+    btn.disabled = true;
+    
+    // Crear enlace de descarga con parámetro de año
+    const endpoint = `api/reportes/madres_desvinculadas_por_anio_excel.php?anio=${anio}`;
+    const link = document.createElement('a');
+    link.href = endpoint;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Restaurar botón después de un momento
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }, 2000);
+}
+
+// Cargar años disponibles para reporte de ayudas por año
+async function loadAniosAyudasDisponibles() {
+    const select = document.getElementById('selectAnioAyudasReporte');
+    const btn = document.getElementById('btnDownloadAyudasPorAnio');
+    
+    if (!select) return;
+    
+    try {
+        const response = await fetch('api/reportes/anios_ayudas.php');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            select.innerHTML = '<option value="">Seleccione un año...</option>';
+            result.data.forEach(anio => {
+                select.innerHTML += `<option value="${anio}">${anio}</option>`;
+            });
+            
+            // Habilitar botón cuando se seleccione un año
+            select.addEventListener('change', function() {
+                btn.disabled = !this.value;
+            });
+        } else {
+            select.innerHTML = '<option value="">No hay años disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar años:', error);
+        select.innerHTML = '<option value="">Error al cargar años</option>';
+    }
+}
+
+// Descargar reporte de ayudas por año
+function downloadReportAyudasPorAnio() {
+    const select = document.getElementById('selectAnioAyudasReporte');
+    const anio = select ? select.value : null;
+    
+    if (!anio) {
+        alert('Por favor seleccione un año');
+        return;
+    }
+    
+    const btn = document.getElementById('btnDownloadAyudasPorAnio');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+    btn.disabled = true;
+    
+    // Crear enlace de descarga con parámetro de año
+    const endpoint = `api/reportes/ayudas_por_anio_excel.php?anio=${anio}`;
+    const link = document.createElement('a');
+    link.href = endpoint;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Restaurar botón después de un momento
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }, 2000);
+}
 
 // ========================================
 // SESIONES DE FORMACIÓN

@@ -51,6 +51,24 @@ try {
     $madre->setNivelEstudio($input['nivelEstudio'] ?? null);
     $madre->setReligion($input['religion'] ?? null);
 
+    $madre->setDeAcuerdoAborto($input['deAcuerdoAborto'] ?? null);
+    $madre->setNombrePareja($input['nombrePareja'] ?? null);
+    $madre->setTelefonoPareja($input['telefonoPareja'] ?? null);
+    $madre->setSeEnteroPor($input['seEnteroPor'] ?? null);
+    $madre->setAsisteDiscipulado($input['asisteDiscipulado'] ?? null);
+    $madre->setContactoParentezco($input['contactoParentezco'] ?? null);
+    $madre->setContactoTelefono($input['contactoTelefono'] ?? null);
+    $madre->setTotalMuertesGestacionales(!empty($input['totalMuertesGestacionales']) ? (int)$input['totalMuertesGestacionales'] : null);
+    $madre->setTotalAbortos(!empty($input['totalAbortos']) ? (int)$input['totalAbortos'] : null);
+    $madre->setNumeroHijos(isset($input['numeroHijos']) ? (int)$input['numeroHijos'] : 0);
+    $madre->setEdadHijos(!empty($input['edadHijos']) ? $input['edadHijos'] : null);
+    $madre->setCondicionFarmacodependiente($input['condicionFarmacodependiente'] ?? null);
+    $madre->setSustanciaConsume(!empty($input['sustanciaConsume']) ? $input['sustanciaConsume'] : null);
+    $madre->setTiempoConsumoSustancia(!empty($input['tiempoConsumoSustancia']) ? $input['tiempoConsumoSustancia'] : null);
+    $madre->setTratamientoPorConsumo(!empty($input['tratamientoPorConsumo']) ? $input['tratamientoPorConsumo'] : null);
+    $madre->setSeCongrega($input['seCongrega'] ?? null);
+    $madre->setIglesiasCongrega(!empty($input['iglesiasCongrega']) ? $input['iglesiasCongrega'] : null);
+
     $madre->setEpsId(!empty($input['epsId']) ? (int) $input['epsId'] : null);
     $madre->setSisben($input['sisben'] ?? null);
     $madre->setAliadoId(!empty($input['aliadoId']) ? (int) $input['aliadoId'] : null);

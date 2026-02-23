@@ -49,6 +49,18 @@ class Madre implements JsonSerializable
     private ?string $novedades;
     private ?string $createdAt;
     private ?string $updatedAt;
+    // Campos adicionales de contacto, salud y congregación
+    private ?string $contactoParentezco;
+    private ?string $contactoTelefono;
+    private ?int $totalMuertesGestacionales;
+    private ?int $totalAbortos;
+    private ?string $edadHijos;
+    private ?string $condicionFarmacodependiente;
+    private ?string $sustanciaConsume;
+    private ?string $tiempoConsumoSustancia;
+    private ?string $tratamientoPorConsumo;
+    private ?string $seCongrega;
+    private ?string $iglesiasCongrega;
 
     // Constructor - Relaciones de agregación con Orientadora, Aliado y Eps
     public function __construct(
@@ -137,6 +149,17 @@ class Madre implements JsonSerializable
         $this->novedades = $novedades;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+        $this->contactoParentezco = null;
+        $this->contactoTelefono = null;
+        $this->totalMuertesGestacionales = null;
+        $this->totalAbortos = null;
+        $this->edadHijos = null;
+        $this->condicionFarmacodependiente = null;
+        $this->sustanciaConsume = null;
+        $this->tiempoConsumoSustancia = null;
+        $this->tratamientoPorConsumo = null;
+        $this->seCongrega = null;
+        $this->iglesiasCongrega = null;
     }
 
     // Getters
@@ -583,7 +606,38 @@ class Madre implements JsonSerializable
         $this->updatedAt = $updatedAt;
     }
 
+    public function getContactoParentezco(): ?string { return $this->contactoParentezco; }
+    public function setContactoParentezco(?string $v): void { $this->contactoParentezco = $v; }
 
+    public function getContactoTelefono(): ?string { return $this->contactoTelefono; }
+    public function setContactoTelefono(?string $v): void { $this->contactoTelefono = $v; }
+
+    public function getTotalMuertesGestacionales(): ?int { return $this->totalMuertesGestacionales; }
+    public function setTotalMuertesGestacionales(?int $v): void { $this->totalMuertesGestacionales = $v; }
+
+    public function getTotalAbortos(): ?int { return $this->totalAbortos; }
+    public function setTotalAbortos(?int $v): void { $this->totalAbortos = $v; }
+
+    public function getEdadHijos(): ?string { return $this->edadHijos; }
+    public function setEdadHijos(?string $v): void { $this->edadHijos = $v; }
+
+    public function getCondicionFarmacodependiente(): ?string { return $this->condicionFarmacodependiente; }
+    public function setCondicionFarmacodependiente(?string $v): void { $this->condicionFarmacodependiente = $v; }
+
+    public function getSustanciaConsume(): ?string { return $this->sustanciaConsume; }
+    public function setSustanciaConsume(?string $v): void { $this->sustanciaConsume = $v; }
+
+    public function getTiempoConsumoSustancia(): ?string { return $this->tiempoConsumoSustancia; }
+    public function setTiempoConsumoSustancia(?string $v): void { $this->tiempoConsumoSustancia = $v; }
+
+    public function getTratamientoPorConsumo(): ?string { return $this->tratamientoPorConsumo; }
+    public function setTratamientoPorConsumo(?string $v): void { $this->tratamientoPorConsumo = $v; }
+
+    public function getSeCongrega(): ?string { return $this->seCongrega; }
+    public function setSeCongrega(?string $v): void { $this->seCongrega = $v; }
+
+    public function getIglesiasCongrega(): ?string { return $this->iglesiasCongrega; }
+    public function setIglesiasCongrega(?string $v): void { $this->iglesiasCongrega = $v; }
 
     public function jsonSerialize(): mixed
     {
@@ -632,6 +686,17 @@ class Madre implements JsonSerializable
             'novedades' => $this->novedades,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,
+            'contactoParentezco' => $this->contactoParentezco,
+            'contactoTelefono' => $this->contactoTelefono,
+            'totalMuertesGestacionales' => $this->totalMuertesGestacionales,
+            'totalAbortos' => $this->totalAbortos,
+            'edadHijos' => $this->edadHijos,
+            'condicionFarmacodependiente' => $this->condicionFarmacodependiente,
+            'sustanciaConsume' => $this->sustanciaConsume,
+            'tiempoConsumoSustancia' => $this->tiempoConsumoSustancia,
+            'tratamientoPorConsumo' => $this->tratamientoPorConsumo,
+            'seCongrega' => $this->seCongrega,
+            'iglesiasCongrega' => $this->iglesiasCongrega,
         ];
     }
 }

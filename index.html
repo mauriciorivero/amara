@@ -54,7 +54,7 @@
                     <div class="filters-container">
                         <div class="filter-group">
                             <input type="text" id="searchNombre" class="filter-input search-input"
-                                placeholder="🔍 Buscar por nombre o apellido...">
+                                placeholder="🔍 Buscar por nombre, apellido, documento o ID...">
                         </div>
 
                         <div class="filter-row">
@@ -278,7 +278,6 @@
                         <form id="madreForm" class="madre-form-modern">
                             <input type="hidden" id="madreId" name="madreId">
 
-                            <!-- Aquí irá el formulario completo - lo agregaré en el siguiente paso -->
                             <div class="form-grid">
                                 <!-- Sección 1: Información Personal -->
                                 <div class="form-section">
@@ -328,6 +327,46 @@
                                             <input type="number" name="edad">
                                         </div>
                                     </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>¿Es Virtual?</label>
+                                            <select name="esVirtual">
+                                                <option value="0">No (Presencial)</option>
+                                                <option value="1">Sí</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Estado Civil</label>
+                                            <select name="estadoCivil">
+                                                <option value="">Seleccione...</option>
+                                                <option value="Soltera">Soltera</option>
+                                                <option value="Casada">Casada</option>
+                                                <option value="Union libre">Unión Libre</option>
+                                                <option value="Separada">Separada</option>
+                                                <option value="Viuda">Viuda</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Nombre de la Pareja</label>
+                                            <input type="text" name="nombrePareja">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Teléfono de la Pareja</label>
+                                            <input type="tel" name="telefonoPareja">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>¿De acuerdo con el aborto?</label>
+                                            <select name="deAcuerdoAborto">
+                                                <option value="">Seleccione...</option>
+                                                <option value="Sí">Sí</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Sección 2: Contacto y Ubicación -->
@@ -341,6 +380,16 @@
                                         <div class="form-group">
                                             <label>Otro Contacto</label>
                                             <input type="tel" name="otroContacto">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Parentesco del Contacto</label>
+                                            <input type="text" name="contactoParentezco" placeholder="Ej: Mamá, Hermana, Esposo">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Teléfono Persona de Contacto</label>
+                                            <input type="tel" name="contactoTelefono">
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -368,11 +417,8 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>¿Es Virtual?</label>
-                                        <select name="esVirtual">
-                                            <option value="0">No (Presencial)</option>
-                                            <option value="1">Sí</option>
-                                        </select>
+                                        <label>¿Cómo se enteró de la corporación?</label>
+                                        <input type="text" name="seEnteroPor" placeholder="Ej: Redes sociales, amiga, hospital...">
                                     </div>
                                 </div>
 
@@ -381,21 +427,9 @@
                                     <h3>Información Socioeconómica</h3>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Estado Civil</label>
-                                            <select name="estadoCivil">
-                                                <option value="Soltera">Soltera</option>
-                                                <option value="Casada">Casada</option>
-                                                <option value="Union libre">Unión Libre</option>
-                                                <option value="Separada">Separada</option>
-                                                <option value="Viuda">Viuda</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
                                             <label>Ocupación</label>
                                             <input type="text" name="ocupacion">
                                         </div>
-                                    </div>
-                                    <div class="form-row">
                                         <div class="form-group">
                                             <label>Nivel Estudio</label>
                                             <select name="nivelEstudio">
@@ -407,10 +441,24 @@
                                                 <option value="Profesional">Profesional</option>
                                             </select>
                                         </div>
+                                    </div>
+                                    <div class="form-row">
                                         <div class="form-group">
                                             <label>Religión</label>
                                             <input type="text" name="religion">
                                         </div>
+                                        <div class="form-group">
+                                            <label>¿Se congrega?</label>
+                                            <select name="seCongrega">
+                                                <option value="">Seleccione...</option>
+                                                <option value="Sí">Sí</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Iglesia donde se congrega</label>
+                                        <input type="text" name="iglesiasCongrega" placeholder="Nombre de la iglesia o congregación">
                                     </div>
                                 </div>
 
@@ -446,6 +494,50 @@
                                     <div class="form-group">
                                         <label>Fecha Ingreso *</label>
                                         <input type="date" name="fechaIngreso" required>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Total Muertes Gestacionales</label>
+                                            <input type="number" name="totalMuertesGestacionales" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Total Abortos</label>
+                                            <input type="number" name="totalAbortos" min="0" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Número de Hijos</label>
+                                            <input type="number" name="numeroHijos" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Edad Promedio de los Hijos</label>
+                                            <input type="text" name="edadHijos" placeholder="Ej: 3 años">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>¿Condición Farmacodependiente?</label>
+                                            <select name="condicionFarmacodependiente">
+                                                <option value="">Seleccione...</option>
+                                                <option value="Sí">Sí</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Sustancia que Consume</label>
+                                            <input type="text" name="sustanciaConsume" placeholder="Ej: Alcohol, marihuana...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tiempo de Consumo</label>
+                                            <input type="text" name="tiempoConsumoSustancia" placeholder="Ej: 2 años">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tratamiento por Consumo</label>
+                                        <input type="text" name="tratamientoPorConsumo" placeholder="Descripción del tratamiento actual o anterior">
                                     </div>
                                 </div>
                             </div>
@@ -2162,6 +2254,99 @@
                             <p>Programas en los que está inscrita cada madre.</p>
                         </div>
                         <button class="btn-download-report" onclick="downloadReport('programas_por_mamas')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Madres Vinculadas por Año -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #2ecc71;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Madres Vinculadas por Año</h3>
+                            <p>Listado de madres vinculadas filtradas por año de ingreso.</p>
+                        </div>
+                        <div class="reporte-search-container">
+                            <label for="selectAnioReporte" class="reporte-search-label">Seleccionar año:</label>
+                            <select id="selectAnioReporte" class="reporte-select-input">
+                                <option value="">Cargando años...</option>
+                            </select>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReportMadresPorAnio()" id="btnDownloadMadresPorAnio" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Madres Desvinculadas por Año -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #e74c3c;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                <line x1="9" y1="14" x2="15" y2="14"></line>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Madres Desvinculadas por Año</h3>
+                            <p>Listado de madres desvinculadas filtradas por año de ingreso.</p>
+                        </div>
+                        <div class="reporte-search-container">
+                            <label for="selectAnioDesvinculadasReporte" class="reporte-search-label">Seleccionar año:</label>
+                            <select id="selectAnioDesvinculadasReporte" class="reporte-select-input">
+                                <option value="">Cargando años...</option>
+                            </select>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReportMadresDesvinculadasPorAnio()" id="btnDownloadMadresDesvinculadasPorAnio" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Descargar Excel
+                        </button>
+                    </div>
+
+                    <!-- Reporte: Ayudas Entregadas por Año -->
+                    <div class="reporte-card">
+                        <div class="reporte-icon" style="background-color: #9b59b6;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                <path d="M12 14l-2 2 2 2"></path>
+                                <path d="M12 14l2 2-2 2"></path>
+                            </svg>
+                        </div>
+                        <div class="reporte-info">
+                            <h3>Ayudas Entregadas por Año</h3>
+                            <p>Listado de ayudas entregadas filtradas por año de registro.</p>
+                        </div>
+                        <div class="reporte-search-container">
+                            <label for="selectAnioAyudasReporte" class="reporte-search-label">Seleccionar año:</label>
+                            <select id="selectAnioAyudasReporte" class="reporte-select-input">
+                                <option value="">Cargando años...</option>
+                            </select>
+                        </div>
+                        <button class="btn-download-report" onclick="downloadReportAyudasPorAnio()" id="btnDownloadAyudasPorAnio" disabled>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>

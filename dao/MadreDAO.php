@@ -22,12 +22,13 @@ class MadreDAO
         // Filtros
         if (!empty($filters['search'])) {
             $where .= " AND (
-                m.primer_nombre LIKE :search OR 
-                m.segundo_nombre LIKE :search OR 
-                m.primer_apellido LIKE :search OR 
+                m.primer_nombre LIKE :search OR
+                m.segundo_nombre LIKE :search OR
+                m.primer_apellido LIKE :search OR
                 m.segundo_apellido LIKE :search OR
                 m.numero_documento LIKE :search OR
-                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search
+                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search OR
+                CAST(m.id AS CHAR) LIKE :search
             )";
             $params[':search'] = '%' . $filters['search'] . '%';
         }
@@ -107,12 +108,13 @@ class MadreDAO
         // Copiar lógica de filtros (idealmente refactorizar en método privado)
         if (!empty($filters['search'])) {
             $where .= " AND (
-                m.primer_nombre LIKE :search OR 
-                m.segundo_nombre LIKE :search OR 
-                m.primer_apellido LIKE :search OR 
+                m.primer_nombre LIKE :search OR
+                m.segundo_nombre LIKE :search OR
+                m.primer_apellido LIKE :search OR
                 m.segundo_apellido LIKE :search OR
                 m.numero_documento LIKE :search OR
-                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search
+                CONCAT(m.primer_nombre, ' ', m.primer_apellido) LIKE :search OR
+                CAST(m.id AS CHAR) LIKE :search
             )";
             $params[':search'] = '%' . $filters['search'] . '%';
         }
@@ -198,14 +200,20 @@ class MadreDAO
             correo_electronico, redes_sociales, direccion, barrio, ciudad,
             numero_hijos, perdidas, estado_civil, nombre_pareja, telefono_pareja, de_acuerdo_aborto,
             nivel_estudio, ocupacion, religion, eps_id, sisben, enfermedades_medicamento, se_entero_por,
-            orientadora_id, aliado_id, asiste_discipulado, desvinculo, novedades
+            orientadora_id, aliado_id, asiste_discipulado, desvinculo, novedades,
+            contacto_parentezco, contacto_telefono, madre_total_muertes_gestacionales, madre_total_abortos,
+            edad_hijos, condicion_farmacodependiente, sustancia_consume, tiempo_consumo_sustancia,
+            tratamiento_por_consumo, se_congrega, iglesia_congrega
         ) VALUES (
             :fechaIngreso, :esVirtual, :primerNombre, :segundoNombre, :primerApellido, :segundoApellido,
             :tipoDocumento, :numeroDocumento, :fechaNacimiento, :edad, :sexo, :numeroTelefono, :otroContacto,
             :correoElectronico, :redesSociales, :direccion, :barrio, :ciudad,
             :numeroHijos, :perdidas, :estadoCivil, :nombrePareja, :telefonoPareja, :deAcuerdoAborto,
             :nivelEstudio, :ocupacion, :religion, :epsId, :sisben, :enfermedadesMedicamento, :seEnteroPor,
-            :orientadoraId, :aliadoId, :asisteDiscipulado, :desvinculo, :novedades
+            :orientadoraId, :aliadoId, :asisteDiscipulado, :desvinculo, :novedades,
+            :contactoParentezco, :contactoTelefono, :totalMuertesGestacionales, :totalAbortos,
+            :edadHijos, :condicionFarmacodependiente, :sustanciaConsume, :tiempoConsumoSustancia,
+            :tratamientoPorConsumo, :seCongrega, :iglesiasCongrega
         )";
 
         $stmt = $this->conn->prepare($sql);
@@ -216,19 +224,25 @@ class MadreDAO
 
     public function update(Madre $madre): bool
     {
-        $sql = "UPDATE madres SET 
-            fecha_ingreso = :fechaIngreso, es_virtual = :esVirtual, primer_nombre = :primerNombre, 
+        $sql = "UPDATE madres SET
+            fecha_ingreso = :fechaIngreso, es_virtual = :esVirtual, primer_nombre = :primerNombre,
             segundo_nombre = :segundoNombre, primer_apellido = :primerApellido, segundo_apellido = :segundoApellido,
             tipo_documento = :tipoDocumento, numero_documento = :numeroDocumento, fecha_nacimiento = :fechaNacimiento,
             edad = :edad, sexo = :sexo, numero_telefono = :numeroTelefono, otro_contacto = :otroContacto,
             correo_electronico = :correoElectronico, redes_sociales = :redesSociales, direccion = :direccion,
             barrio = :barrio, ciudad = :ciudad,
-            numero_hijos = :numeroHijos, perdidas = :perdidas, estado_civil = :estadoCivil, 
+            numero_hijos = :numeroHijos, perdidas = :perdidas, estado_civil = :estadoCivil,
             nombre_pareja = :nombrePareja, telefono_pareja = :telefonoPareja, de_acuerdo_aborto = :deAcuerdoAborto,
             nivel_estudio = :nivelEstudio, ocupacion = :ocupacion, religion = :religion, eps_id = :epsId,
             sisben = :sisben, enfermedades_medicamento = :enfermedadesMedicamento, se_entero_por = :seEnteroPor,
             orientadora_id = :orientadoraId, aliado_id = :aliadoId, asiste_discipulado = :asisteDiscipulado,
-            desvinculo = :desvinculo, novedades = :novedades
+            desvinculo = :desvinculo, novedades = :novedades,
+            contacto_parentezco = :contactoParentezco, contacto_telefono = :contactoTelefono,
+            madre_total_muertes_gestacionales = :totalMuertesGestacionales, madre_total_abortos = :totalAbortos,
+            edad_hijos = :edadHijos, condicion_farmacodependiente = :condicionFarmacodependiente,
+            sustancia_consume = :sustanciaConsume, tiempo_consumo_sustancia = :tiempoConsumoSustancia,
+            tratamiento_por_consumo = :tratamientoPorConsumo, se_congrega = :seCongrega,
+            iglesia_congrega = :iglesiasCongrega
             WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -277,7 +291,18 @@ class MadreDAO
             ':aliadoId' => $madre->getAliadoId(),
             ':asisteDiscipulado' => $madre->getAsisteDiscipulado(),
             ':desvinculo' => $madre->getDesvinculo(),
-            ':novedades' => $madre->getNovedades()
+            ':novedades' => $madre->getNovedades(),
+            ':contactoParentezco' => $madre->getContactoParentezco(),
+            ':contactoTelefono' => $madre->getContactoTelefono(),
+            ':totalMuertesGestacionales' => $madre->getTotalMuertesGestacionales(),
+            ':totalAbortos' => $madre->getTotalAbortos(),
+            ':edadHijos' => $madre->getEdadHijos(),
+            ':condicionFarmacodependiente' => $madre->getCondicionFarmacodependiente(),
+            ':sustanciaConsume' => $madre->getSustanciaConsume(),
+            ':tiempoConsumoSustancia' => $madre->getTiempoConsumoSustancia(),
+            ':tratamientoPorConsumo' => $madre->getTratamientoPorConsumo(),
+            ':seCongrega' => $madre->getSeCongrega(),
+            ':iglesiasCongrega' => $madre->getIglesiasCongrega(),
         ];
     }
 
@@ -346,6 +371,17 @@ class MadreDAO
         $madre->setNovedades($row['novedades']);
         $madre->setCreatedAt($row['created_at']);
         $madre->setUpdatedAt($row['updated_at']);
+        $madre->setContactoParentezco($row['contacto_parentezco'] ?? null);
+        $madre->setContactoTelefono($row['contacto_telefono'] ?? null);
+        $madre->setTotalMuertesGestacionales(isset($row['madre_total_muertes_gestacionales']) && $row['madre_total_muertes_gestacionales'] !== null ? (int)$row['madre_total_muertes_gestacionales'] : null);
+        $madre->setTotalAbortos(isset($row['madre_total_abortos']) && $row['madre_total_abortos'] !== null ? (int)$row['madre_total_abortos'] : null);
+        $madre->setEdadHijos($row['edad_hijos'] ?? null);
+        $madre->setCondicionFarmacodependiente($row['condicion_farmacodependiente'] ?? null);
+        $madre->setSustanciaConsume($row['sustancia_consume'] ?? null);
+        $madre->setTiempoConsumoSustancia($row['tiempo_consumo_sustancia'] ?? null);
+        $madre->setTratamientoPorConsumo($row['tratamiento_por_consumo'] ?? null);
+        $madre->setSeCongrega($row['se_congrega'] ?? null);
+        $madre->setIglesiasCongrega($row['iglesia_congrega'] ?? null);
 
         // Relaciones
         $madre->setOrientadora($orientadora);
